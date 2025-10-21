@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio
+
+My personal portfolio and technical blog built with Next.js 15, showcasing backend development projects and writing about authentication, security, and software architecture.
+
+## Features
+
+- **Blog** - Technical articles on JWT, TOTP, rate limiting, testing, and Docker
+- **Portfolio** - Project showcases with live stats and detailed case studies
+- **Interactive Terminal** - Easter eggs and terminal emulator
+- **Table of Contents** - Sticky TOC with scroll spy for blog posts
+- **Dark Mode** - Full theme support
+
+## Tech Stack
+
+- **Framework:** Next.js 15 (App Router, Turbopack)
+- **Styling:** Tailwind CSS v4
+- **Content:** Velite (MDX compilation)
+- **Animations:** Framer Motion
+- **Code Editor:** Monaco Editor
+- **Deployment:** Vercel
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build for production
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/              # Next.js app router pages
+│   ├── blog/         # Blog listing and posts
+│   ├── lab/          # Interactive code playground (hidden in production)
+│   └── api/          # API routes (GitHub stats)
+├── components/       # React components
+│   └── sections/     # Page sections (hero, about, skills, projects, contact)
+└── lib/              # Utilities and data
 
-## Learn More
+content/
+└── blog/             # MDX blog posts
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Blog Infrastructure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Posts written in MDX with frontmatter
+- Automatic TOC generation from headings
+- Syntax highlighting with rehype-pretty-code
+- SEO metadata generation
+- Tag filtering and sorting
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Lab Feature
 
-## Deploy on Vercel
+The `/lab` route contains an interactive code playground with Monaco editor. Currently hidden from production navigation but accessible via direct URL for development.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+To enable in production, uncomment the lab link in `src/components/navigation.tsx`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Development
+
+```bash
+# Run Velite to process MDX content
+npx velite
+
+# Check for TypeScript errors
+npm run build
+
+# Lint code
+npm run lint
+```
+
+## License
+
+MIT
