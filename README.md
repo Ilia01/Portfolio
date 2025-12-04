@@ -34,22 +34,6 @@ npm run build
 
 Visit `http://localhost:3000`
 
-## Project Structure
-
-```
-src/
-├── app/              # Next.js app router pages
-│   ├── blog/         # Blog listing and posts
-│   ├── lab/          # Interactive code playground (hidden in production)
-│   └── api/          # API routes (GitHub stats)
-├── components/       # React components
-│   └── sections/     # Page sections (hero, about, skills, projects, contact)
-└── lib/              # Utilities and data
-
-content/
-└── blog/             # MDX blog posts
-```
-
 ## Blog Infrastructure
 
 - Posts written in MDX with frontmatter
