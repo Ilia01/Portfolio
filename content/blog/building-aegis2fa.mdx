@@ -1,24 +1,23 @@
 ---
-title: "Building Aegis2FA: Enterprise 2FA Without Vendor Lock-in"
-description: "How I built a production-ready two-factor authentication service that saves businesses $1,188/year while maintaining enterprise-grade security."
+title: "Building Aegis2FA: Learning Authentication the Hard Way"
+description: "How I built a complete 2FA service to understand authentication patterns—TOTP, JWT refresh tokens, Argon2, and rate limiting. A technical deep-dive into what I learned."
 date: 2025-01-15
 published: true
-tags: ["authentication", "security", "backend", "case-study"]
+tags: ["authentication", "security", "backend", "learning"]
 ---
 
-## The Problem
+## Why Build This?
 
-Companies need secure 2FA solutions, but existing services like Auth0 and Okta cost $99+/month and lock you into their platforms. For small businesses and startups, this creates a dilemma: sacrifice security or pay premium prices.
+I wanted to understand authentication beyond tutorials. How does TOTP actually work? Why is Argon2 better than bcrypt? How do you prevent JWT token theft?
 
-## The Solution
-
-I built **Aegis2FA** - a self-hosted, production-ready 2FA service with:
+The best way to learn is to build. So I built **Aegis2FA**—a complete 2FA service with:
 
 - Multiple authentication methods (TOTP, SMS, Email, Backup codes)
-- Enterprise-grade security (Argon2id, JWT with refresh tokens)
+- Modern security patterns (Argon2id, JWT with refresh tokens)
 - Comprehensive documentation
 - 80%+ test coverage
-- Zero-budget deployment options
+
+This isn't production software—it's a learning project that demonstrates real authentication patterns. Here's what I learned building it.
 
 ## Technical Architecture
 
@@ -92,33 +91,23 @@ async generateBackupCodes(userId: string): Promise<string[]> {
 
 **Solution**: Added a configurable time window of ±60 seconds and implemented NTP sync recommendations in the client app.
 
-## Impact & Results
+## What I Learned
 
-Results after 6 months of production use:
+**Security isn't optional**: Every endpoint needs rate limiting. Every password needs proper hashing. Every token needs validation. No shortcuts.
 
-**$1,188/year saved** compared to Auth0's Team plan
+**Documentation teaches you**: Writing docs for Aegis2FA forced me to understand edge cases I'd missed. If you can't explain it clearly, you don't fully understand it.
 
-**99.9% uptime** over 6 months of self-hosting
+**Tests catch real bugs**: Integration tests found 3 race conditions I would've shipped. Token reuse vulnerability caught by a simple test. Password length DoS attack prevented because someone wrote a test with 10,000 character passwords.
 
-**Sub-100ms** average authentication response time
+**Production patterns matter**: Even in a learning project, using real patterns (JWT rotation, distributed locks, structured logging) teaches you how production systems actually work.
 
-**Zero CVEs** with no known security vulnerabilities
+## Applying These Lessons
 
-**80%+ test coverage** with integration and e2e tests
-
-## Lessons Learned
-
-**Security is not optional**: Every endpoint needs rate limiting, every password needs proper hashing, every token needs validation.
-
-**Documentation is a feature**: Spent 30% of development time on docs. Result? Zero support tickets about how to integrate.
-
-**Test coverage matters**: Integration tests caught 3 critical race conditions before production.
-
-**Self-hosting is viable**: With Docker and proper monitoring, you don't need expensive managed services.
+I'm now using these authentication patterns in production systems at Andersen. Understanding TOTP internals, JWT security, and rate limiting strategies helps me make better architecture decisions for real projects.
 
 ## What's Next
 
-Planning to add WebAuthn/FIDO2 support for passwordless authentication, an admin dashboard for user management, Terraform modules for one-click AWS deployment, and multi-region support with automatic failover.
+Planning to add WebAuthn/FIDO2 support for passwordless authentication and an admin dashboard. These features will give me hands-on experience with modern auth standards.
 
 ## Try It Yourself
 

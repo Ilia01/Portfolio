@@ -1,6 +1,6 @@
 ---
-title: "Rate Limiting and CSRF Protection in Node.js: A Production Guide"
-description: "Implement production-grade rate limiting, CSRF protection, and security headers to protect your Node.js API from attacks."
+title: "Rate Limiting and CSRF Protection in Node.js"
+description: "Implementing rate limiting, CSRF protection, and security headers for Node.js APIs. Lessons from building Aegis2FA."
 date: 2025-01-06
 published: true
 tags: ["security", "nodejs", "backend", "rate-limiting"]
@@ -8,13 +8,13 @@ tags: ["security", "nodejs", "backend", "rate-limiting"]
 
 ## Why Rate Limiting Matters
 
-In the first week of Aegis2FA's alpha testing, I noticed something alarming: someone was hammering the login endpoint with 500+ requests per minute. Without rate limiting, this could have:
-- Enabled brute force attacks
-- Caused database overload
-- Racked up compute costs
-- Created a denial-of-service situation
+When building Aegis2FA, I realized rate limiting wasn't optional. Without it:
+- Brute force attacks become trivial
+- Database gets hammered by malicious requests
+- Compute costs spiral
+- Denial-of-service becomes easy
 
-Rate limiting became priority zero.
+Rate limiting protects both the system and legitimate users.
 
 ## The Multi-Layer Approach
 

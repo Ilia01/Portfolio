@@ -1,22 +1,22 @@
 ---
-title: "Zero-Cost Docker Deployment: Running Aegis2FA in Production"
-description: "Complete guide to deploying a Node.js app with Docker, PostgreSQL, and Redis using free tier services. Includes Docker Compose, health checks, and monitoring."
+title: "Zero-Cost Docker Deployment: Learning Production Patterns"
+description: "Guide to deploying a Node.js app with Docker, PostgreSQL, and Redis using free tier services. Learning deployment without spending money."
 date: 2025-01-02
 published: true
 tags: ["docker", "deployment", "devops", "backend"]
 ---
 
-## The Zero-Cost Challenge
+## The Learning Challenge
 
-I wanted to deploy Aegis2FA without spending a dime. The goal:
+I wanted to deploy Aegis2FA to understand production deployment patterns without spending money. The goal:
 - **PostgreSQL** database
 - **Redis** for caching and rate limiting
 - **Node.js** backend
 - **HTTPS** with SSL
-- **Monitoring** and logging
-- **$0/month** cost
+- **Monitoring** and health checks
+- **$0/month** cost (free tiers only)
 
-Spoiler: I achieved it. Here's how.
+Here's what actually works in free tiers.
 
 ## The Stack
 
@@ -256,7 +256,7 @@ primary_region = "iad"
 #!/bin/bash
 set -e
 
-echo "🚀 Deploying Aegis2FA to Fly.io..."
+echo "Deploying Aegis2FA to Fly.io..."
 
 # Set secrets (one-time)
 fly secrets set \
@@ -275,8 +275,8 @@ fly deploy --ha=false
 # Verify deployment
 fly status
 
-echo "✅ Deployment complete!"
-echo "🌐 App available at: https://aegis2fa.fly.dev"
+echo "Deployment complete!"
+echo "App available at: https://aegis2fa.fly.dev"
 ```
 
 ### Setting Up Free Database (Supabase)
@@ -500,7 +500,7 @@ aws s3 cp $BACKUP_FILE s3://aegis2fa-backups/
 # Keep only last 7 days
 find $BACKUP_DIR -name "*.sql.gz" -mtime +7 -delete
 
-echo "✅ Backup complete: $BACKUP_FILE"
+echo "Backup complete: $BACKUP_FILE"
 ```
 
 ### Automated Backup with Cron
@@ -604,7 +604,7 @@ When you outgrow free tier:
 **Supabase** - $25/month for 8GB database
 **Upstash** - $10/month for 1M commands
 
-Total: ~$40/month for production-grade infrastructure
+Total: ~$40/month for paid tier infrastructure
 
 ---
 

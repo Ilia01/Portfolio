@@ -36,27 +36,28 @@ export function HireMeBanner() {
             {/* Headline */}
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-3">
-                Let&apos;s Build Something Great Together
+                Looking for a Backend Engineer Who Leads
               </h2>
               <p className="text-zinc-600 dark:text-zinc-400 text-lg max-w-2xl mx-auto">
-                Backend engineer with expertise in Node.js, TypeScript, and Python.
-                Ready to contribute to your team and deliver production-ready solutions.
+                Currently leading a Node.js team at Andersen. I build backends, review code,
+                make architecture decisions, and occasionally write blog posts about what I learn.
+                Based in T&apos;bilisi, Georgia.
               </p>
             </div>
 
             {/* Key Points */}
             <div className="grid md:grid-cols-3 gap-4 max-w-3xl mx-auto text-left">
               <div className="p-4 rounded-lg bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                <div className="text-green-400 font-mono text-sm mb-1">Current Role</div>
+                <div className="text-zinc-700 dark:text-zinc-300 text-sm">Node.js Team Lead at Andersen</div>
+              </div>
+              <div className="p-4 rounded-lg bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
                 <div className="text-green-400 font-mono text-sm mb-1">Focus</div>
-                <div className="text-zinc-700 dark:text-zinc-300 text-sm">Clean architecture, security, performance</div>
+                <div className="text-zinc-700 dark:text-zinc-300 text-sm">Backend systems, team leadership, code reviews</div>
               </div>
               <div className="p-4 rounded-lg bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
-                <div className="text-green-400 font-mono text-sm mb-1">Experience</div>
-                <div className="text-zinc-700 dark:text-zinc-300 text-sm">Production systems, API design, testing</div>
-              </div>
-              <div className="p-4 rounded-lg bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
-                <div className="text-green-400 font-mono text-sm mb-1">Availability</div>
-                <div className="text-zinc-700 dark:text-zinc-300 text-sm">Open to full-time & contract roles</div>
+                <div className="text-green-400 font-mono text-sm mb-1">Location</div>
+                <div className="text-zinc-700 dark:text-zinc-300 text-sm">T&apos;bilisi, Georgia · Open to remote</div>
               </div>
             </div>
 

@@ -334,11 +334,11 @@ Always test with actual apps (Google Authenticator, Authy) before deploying.
 
 ## Lessons Learned
 
-After implementing TOTP in production:
+After implementing TOTP in Aegis2FA:
 
 **Set window to 1, not 2**: Window of 2 (150 seconds) is too permissive and reduces security significantly.
 
-**Always provide backup codes**: 15-20% of users will lose access to their authenticator app.
+**Always provide backup codes**: Users will lose access to their authenticator app. Plan for it.
 
 **Show visual feedback**: Display the QR code immediately and provide a manual entry option.
 

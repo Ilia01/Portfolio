@@ -1,8 +1,8 @@
 export const profileData = {
   name: "Ilia Goginashvili",
-  tagline: "I use Arch btw. I ship backends — and sometimes, the tools that document them.",
-  role: "Backend Developer",
-  roleExtended: "Node.js (NestJS/Express) · TypeScript · Python",
+  tagline: "Software Engineer Trainee at Andersen, leading a Node.js team. Built Aegis2FA to learn auth the hard way.",
+  role: "Software Engineer Trainee",
+  roleExtended: "Node.js Team Lead at Andersen · TypeScript · NestJS · Express",
   focus: "clean architecture, auth & security, PostgreSQL/Prisma, performance",
 
   contact: {
@@ -12,15 +12,31 @@ export const profileData = {
     cvAvailable: true,
   },
 
+  experience: [
+    {
+      company: "Andersen",
+      role: "Software Engineer Trainee (Node.js Team Lead)",
+      period: "October 2025 - Present",
+      location: "T'bilisi, Georgia",
+      highlights: [
+        "Leading Node.js development team, conducting code reviews and architecture decisions",
+        "Took on Tech Lead responsibilities including epic estimation",
+        "Managing team workflow",
+        "Implementing clean architecture patterns",
+      ],
+      technologies: ["Node.js", "TypeScript", "NestJS", "PostgreSQL", "Redis", "Team Leadership", "Code Reviews"],
+    },
+  ],
+
   about: {
-    intro: "Backend Developer — Node.js (NestJS/Express) · TypeScript · Python",
+    intro: "Software Engineer Trainee at Andersen, leading a Node.js team. Handling code reviews, epic estimation, and architecture decisions.",
     focus: "clean architecture, auth & security, PostgreSQL/Prisma, performance",
     philosophy: [
-      "Ship one high-quality public repo (backend first, frontend minimal)",
-      "Prioritize correctness, observability, docs over flash",
-      "Keep configs reproducible (Docker) and predictable (scripts)",
+      "Built Aegis2FA to understand authentication deeply, not to replace Auth0",
+      "Code reviews and team work over solo hero mode",
+      "Tests should catch bugs, docs should explain why",
     ],
-    tagline: "Tools minimal. Docs automated. Code speaks.",
+    tagline: "Backend systems. Team leadership. More leading, more code.",
   },
 
   skills: {
@@ -65,21 +81,21 @@ export const profileData = {
     {
       id: "aegis2fa",
       title: "Aegis2FA",
-      subtitle: "Two-Factor Authentication Service",
-      description: "Production-ready 2FA service with enterprise-grade security, multiple 2FA methods, and comprehensive API.",
-      longDescription: "Enterprise-grade two-factor authentication service with TOTP, SMS, and Email verification. Features comprehensive documentation, 80%+ test coverage, and zero-budget deployment options.",
+      subtitle: "Two-Factor Authentication Service (Active Development)",
+      description: "Built a complete 2FA service to understand authentication patterns. TOTP, JWT refresh tokens, Argon2, and 80%+ test coverage.",
+      longDescription: "Learning project to understand authentication deeply. Features TOTP, SMS, and Email verification with comprehensive documentation and tests. Active development with regular updates.",
 
       // Problem-Action-Result
-      problem: "Companies need secure, cost-effective 2FA solutions but existing services cost $99+/month and lock you into their platforms.",
-      action: "Built a production-ready, self-hosted 2FA service with multiple auth methods, enterprise security standards, and comprehensive documentation.",
-      result: "Created a zero-cost alternative saving businesses $1,188/year while maintaining enterprise-grade security with 80%+ test coverage and automated CI/CD.",
+      problem: "Wanted to understand authentication beyond tutorials—how TOTP works, why Argon2 beats bcrypt, how JWT refresh token rotation prevents theft.",
+      action: "Built a complete 2FA service from scratch with multiple auth methods, proper security patterns, and 80%+ test coverage. Documented everything I learned.",
+      result: "Gained hands-on experience with authentication patterns. Now applying these lessons to production systems at Andersen.",
 
       // Impact Metrics
       impact: {
-        performance: { value: "99.9%", label: "Uptime", description: "High availability" },
-        quality: { value: "80%+", label: "Test Coverage", description: "Comprehensive testing" },
-        security: { value: "Zero", label: "CVEs", description: "No known vulnerabilities" },
-        cost: { value: "$1,188", label: "Cost Savings", description: "vs paid alternatives/year" },
+        learning: { value: "Deep", label: "Auth Knowledge", description: "TOTP, JWT, Argon2, rate limiting" },
+        quality: { value: "80%+", label: "Test Coverage", description: "Unit, integration, E2E" },
+        documentation: { value: "Complete", label: "Docs Site", description: "MkDocs with examples" },
+        status: { value: "Active", label: "Development", description: "Regular updates" },
       },
 
       technologies: [
@@ -106,11 +122,10 @@ export const profileData = {
         "Zero-budget deployment options",
       ],
       highlights: [
-        "Production-ready backend API",
-        "Enterprise security standards",
-        "Full test coverage (80%+)",
-        "Automated CI/CD pipeline",
-        "Comprehensive documentation",
+        "Technical deep-dive into authentication patterns",
+        "Applying these patterns in production work now",
+        "Test suite catches edge cases (80%+ coverage)",
+        "Documentation-first approach",
       ],
       github: "https://github.com/Ilia01/Aegis2FA",
       demo: "https://Ilia01.github.io/Aegis2FA/",
@@ -127,20 +142,20 @@ export const profileData = {
       id: "apiflow",
       title: "ApiFlow",
       subtitle: "API Documentation Generator",
-      description: "Python static site generator for OpenAPI specs with version management and offline support.",
-      longDescription: "Beautiful API documentation generator that converts OpenAPI specifications into interactive static HTML sites. Built first as a tool, then used to document other projects.",
+      description: "Static site generator for OpenAPI specs. Built it because I needed it, then used it to document my other projects.",
+      longDescription: "Python tool that converts OpenAPI specifications into static HTML documentation. Built as a personal tool, then used for Aegis2FA and task-management-api docs.",
 
       // Problem-Action-Result
-      problem: "Swagger UI is outdated and paid doc services like ReadMe cost $99/month minimum, locking developers into expensive platforms.",
-      action: "Built a Python static site generator that converts OpenAPI specs into beautiful, searchable HTML with version management and offline support.",
-      result: "Created a free, open-source alternative that generates docs 90% faster than manual writing, saving $1,188/year vs paid services.",
+      problem: "Swagger UI feels outdated, and I wanted offline docs without paying for hosted services.",
+      action: "Built a Python static site generator using Jinja2 templates. Takes OpenAPI YAML files and generates searchable HTML with version management.",
+      result: "Created a tool I actually use. Documented Aegis2FA and task-management-api with it. No servers needed, works offline.",
 
       // Impact Metrics
       impact: {
-        performance: { value: "90%", label: "Faster", description: "vs manual documentation" },
-        cost: { value: "$1,188", label: "Saved/Year", description: "vs ReadMe/Stoplight" },
-        adoption: { value: "Self", label: "Dogfooding", description: "Used for own projects" },
-        quality: { value: "3", label: "Themes", description: "Premium design options" },
+        simplicity: { value: "YAML→HTML", label: "Static Output", description: "No backend needed" },
+        usage: { value: "Dogfooding", label: "Real Use", description: "Used for own projects" },
+        features: { value: "Search+Versions", label: "Core Features", description: "Fuzzy search, changelogs" },
+        themes: { value: "3", label: "Design Options", description: "Clean, minimal themes" },
       },
 
       technologies: [
@@ -161,10 +176,10 @@ export const profileData = {
         "Used to document task-management-api project",
       ],
       highlights: [
-        "First project built",
-        "Used for own documentation needs",
-        "Zero-cost alternative to paid services",
-        "Static output for easy deployment",
+        "Built for personal use, actually using it",
+        "Simple: YAML in, HTML out",
+        "No server costs or dependencies",
+        "Customizable with Jinja2 templates",
       ],
       github: "https://github.com/Ilia01/apiflow",
       category: "tooling",

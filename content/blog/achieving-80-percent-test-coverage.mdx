@@ -8,17 +8,16 @@ tags: ["testing", "nodejs", "ci-cd", "quality"]
 
 ## Why 80% Coverage?
 
-When building a security-focused product like Aegis2FA, bugs aren't just annoying - they're catastrophic. A single authentication bypass could compromise thousands of users.
+When building Aegis2FA as a learning project, I set a goal: **80%+ test coverage before calling it "done"**.
 
-I set a goal: **80%+ test coverage before v1.0**.
+Not because tests guarantee correctness, but because writing tests forces you to think about edge cases. And in authentication, edge cases become security vulnerabilities.
 
-Three months later:
-- **84% total coverage**
-- **3 critical race conditions caught**
-- **Zero security vulnerabilities in audit**
-- **Confidence to ship**
+Here's what I learned achieving 84% coverage:
+- **Found 3 race conditions** before ever deploying
+- **Caught a token reuse vulnerability** with a simple test
+- **Prevented a DoS attack** by testing password length limits
 
-Here's how I did it.
+More importantly, I learned how to structure tests for real systems. These testing patterns now guide how I write tests for production code at Andersen.
 
 ## The Testing Pyramid
 
@@ -723,25 +722,17 @@ it('should enforce maximum password length', async () => {
 });
 ```
 
-## Lessons Learned
+## What This Taught Me
 
-**Write tests before fixing bugs**: Reproduce the bug in a test first, then fix it.
+**Integration tests catch more bugs than unit tests**: 70% of bugs I found were caught by integration tests hitting real database and Redis.
 
-**Integration tests catch the most bugs**: 70% of bugs I found were in integration tests.
+**E2E tests are expensive but worth it for critical flows**: Don't test everything end-to-end. Test the flows that matter—login, 2FA setup, token refresh.
 
-**E2E tests are expensive but valuable**: Reserve them for critical user flows.
+**Write tests before fixing bugs**: When you find a bug, write a test that reproduces it first. Then fix it. The test becomes documentation of the bug and insurance it doesn't come back.
 
-**Mock external services**: Don't call real email/SMS APIs in tests.
+**Coverage numbers don't tell the whole story**: 80% coverage with good tests beats 95% coverage with tests that don't test anything meaningful.
 
-**Use fixtures**: Reusable test data makes tests cleaner.
-
-## Results
-
-- **84% coverage** achieved
-- **3 critical bugs** caught before production
-- **Zero regressions** in 6 months
-- **Faster development** - confidence to refactor
-- **Passed security audit** with flying colors
+I'm now applying this testing approach to production systems at Andersen—focusing on integration tests for critical paths and accepting that not everything needs 100% coverage.
 
 ---
 

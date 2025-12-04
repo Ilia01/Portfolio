@@ -543,25 +543,20 @@ export async function verifyAccessToken(
 }
 ```
 
-## Results in Production
+## Lessons Applied
 
-After 6 months of Aegis2FA in production:
+This two-token architecture is what I recommend for production systems:
 
-- **Zero token breaches**
-- **99.99% uptime** for auth endpoints
-- **Sub-50ms token verification** with caching
-- **Automatic token rotation** working flawlessly
-- **Zero XSS token theft** thanks to HttpOnly cookies
+**Stateless with accountability**: Access tokens are stateless (no DB lookup), but refresh tokens are tracked (can revoke when needed).
 
-## Conclusion
+**Security by default**: Short-lived access tokens limit damage if stolen. HttpOnly cookies prevent XSS theft. Token rotation catches reuse.
 
-The two-token JWT system provides:
-- Stateless authentication
-- Automatic security through rotation
-- Protection against XSS and CSRF
-- Smooth user experience
+**Smooth user experience**: Users don't get logged out every 15 minutes. The frontend automatically refreshes tokens before they expire.
 
-Key takeaways:
+At Andersen, I've applied these patterns to production APIs. The architecture works well for systems that need both scalability and security.
+
+## Key Takeaways
+
 - Short-lived access tokens (15 min)
 - HttpOnly refresh tokens (7 days)
 - Rotate on every use

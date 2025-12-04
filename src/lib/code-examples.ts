@@ -181,7 +181,7 @@ async function verifyJWT(token: string, secret: string): Promise<{ valid: boolea
   console.log('Header:', JSON.parse(base64UrlDecode(token.split('.')[0])));
   console.log('Payload:', JSON.parse(base64UrlDecode(token.split('.')[1])));
 
-  console.log('\\n✅ Verification:');
+  console.log('\\nVerification:');
   const result = await verifyJWT(token, secret);
   console.log('Valid:', result.valid);
   console.log('Payload:', result.payload);
@@ -244,12 +244,12 @@ class SlidingWindowRateLimiter {
 const limiter = new SlidingWindowRateLimiter(5000, 3); // 3 requests per 5 seconds
 const userId = 'user123';
 
-console.log('🛡️  Rate Limiter Demo');
+console.log('Rate Limiter Demo');
 console.log('Limit: 3 requests per 5 seconds\\n');
 
 for (let i = 1; i <= 6; i++) {
   const result = limiter.isAllowed(userId);
-  const status = result.allowed ? '✅' : '❌';
+  const status = result.allowed ? '' : '❌';
   const timeToReset = Math.ceil((result.resetAt - Date.now()) / 1000);
 
   console.log(\`Request #\${i}: \${status}\`);
@@ -330,14 +330,14 @@ function displayAnalysis(password: string) {
   console.log(\`Crack Time: ~\${result.crackTime}\`);
   console.log(\`Score: \${result.passedChecks}/8\\n\`);
   console.log('Requirements:');
-  console.log(\`  \${result.checks.length ? '✅' : '❌'} Length ≥ 12 characters\`);
-  console.log(\`  \${result.checks.uppercase ? '✅' : '❌'} Contains uppercase\`);
-  console.log(\`  \${result.checks.lowercase ? '✅' : '❌'} Contains lowercase\`);
-  console.log(\`  \${result.checks.numbers ? '✅' : '❌'} Contains numbers\`);
-  console.log(\`  \${result.checks.special ? '✅' : '❌'} Contains special chars\`);
-  console.log(\`  \${result.checks.noCommon ? '✅' : '❌'} Not a common password\`);
-  console.log(\`  \${result.checks.noRepeating ? '✅' : '❌'} No repeating characters\`);
-  console.log(\`  \${result.checks.noSequential ? '✅' : '❌'} No sequential patterns\`);
+  console.log(\`  \${result.checks.length ? '' : '❌'} Length ≥ 12 characters\`);
+  console.log(\`  \${result.checks.uppercase ? '' : '❌'} Contains uppercase\`);
+  console.log(\`  \${result.checks.lowercase ? '' : '❌'} Contains lowercase\`);
+  console.log(\`  \${result.checks.numbers ? '' : '❌'} Contains numbers\`);
+  console.log(\`  \${result.checks.special ? '' : '❌'} Contains special chars\`);
+  console.log(\`  \${result.checks.noCommon ? '' : '❌'} Not a common password\`);
+  console.log(\`  \${result.checks.noRepeating ? '' : '❌'} No repeating characters\`);
+  console.log(\`  \${result.checks.noSequential ? '' : '❌'} No sequential patterns\`);
 }
 
 // Test passwords
@@ -428,7 +428,7 @@ const time4 = measureTime(() => {
 console.log(\`  Wrong at start: \${time3.toFixed(3)}ms\`);
 console.log(\`  Wrong at end:   \${time4.toFixed(3)}ms\`);
 console.log(\`  Difference:     \${Math.abs(time3 - time4).toFixed(3)}ms\`);
-console.log('  ✅ Constant time - no timing leak!');
+console.log('   Constant time - no timing leak!');
 
 console.log('\\n💡 Always use crypto.timingSafeEqual() in production!');`,
   },
@@ -513,12 +513,12 @@ console.log('Length increase:', ((encoded.length / original.length - 1) * 100).t
 
 const decoded = base64Decode(encoded);
 console.log('Decoded:', decoded);
-console.log('\\nMatch:', original === decoded ? '✅' : '❌');
+console.log('\\nMatch:', original === decoded ? '' : '❌');
 
 // Compare with native
 const nativeEncoded = Buffer.from(original).toString('base64');
 console.log('\\nNative encoding:', nativeEncoded);
-console.log('Match with native:', encoded === nativeEncoded ? '✅' : '❌');`,
+console.log('Match with native:', encoded === nativeEncoded ? '' : '❌');`,
   },
   {
     id: "hash-table",

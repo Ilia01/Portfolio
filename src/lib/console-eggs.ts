@@ -35,10 +35,10 @@ export const initConsoleEasterEggs = () => {
   • Type 'fortune' for developer wisdom
 
 %cWant to work together? Let&apos;s talk!
-📧 iliagoginashvili16@gmail.com
-🐙 github.com/Ilia01
+ iliagoginashvili16@gmail.com
+ github.com/Ilia01
 
-%cHappy exploring! 🚀
+%cHappy exploring! 
 `,
     "color: #10b981; font-family: monospace;",
     "color: #ffffff; font-size: 14px; font-weight: bold;",
@@ -83,17 +83,17 @@ export const initConsoleEasterEggs = () => {
 
   (console as ExtendedConsole).hire = () => {
     console.log(`
-%c📧 Let&apos;s work together!
+%cLet&apos;s work together!
 %cEmail: iliagoginashvili16@gmail.com
 GitHub: github.com/Ilia01
 LinkedIn: linkedin.com/in/ilia-goginashvili-066689305
 
 %cI&apos;m open to:
-  ✅ Backend engineering roles
-  ✅ Interesting projects
-  ✅ Collaboration opportunities
+  Backend engineering roles
+  Interesting projects
+  Collaboration opportunities
 
-%cLet&apos;s build something awesome! 🚀
+%cLet&apos;s build something awesome!
 `,
       "color: #10b981; font-weight: bold; font-size: 14px;",
       "color: #ffffff; font-family: monospace;",

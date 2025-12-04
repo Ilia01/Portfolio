@@ -293,7 +293,7 @@ All projects running smoothly! 🐳`,
 - ready started server on 0.0.0.0:3000
 - info Loaded env from .env
 - event compiled successfully
-- Currently working on: Building awesome portfolios! 🚀`,
+- Currently working on: Building awesome portfolios!`,
       };
     }
 
@@ -333,7 +333,7 @@ All projects running smoothly! 🐳`,
 :: Starting full system upgrade...
  there is nothing to do
 
-All skills up to date! 📦✨
+All skills up to date!
 (I use Arch btw)`,
       };
     }

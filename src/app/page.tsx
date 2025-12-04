@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Navigation } from "@/components/navigation";
 import { Hero } from "@/components/sections/hero";
+import { Experience } from "@/components/sections/experience";
 import { Projects } from "@/components/sections/projects";
 import { Skills } from "@/components/sections/skills";
 import { About } from "@/components/sections/about";
@@ -23,6 +24,7 @@ export default function Home() {
         <Navigation />
         <main>
           <Hero />
+          <Experience />
           <Projects />
           <Skills />
           <About />
