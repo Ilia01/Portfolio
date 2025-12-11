@@ -3,7 +3,63 @@
 import * as React from "react";
 import * as runtime from "react/jsx-runtime";
 import Image from "next/image";
+import { Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+function CodeBlock({ className, children, ...props }: React.HTMLAttributes<HTMLPreElement>) {
+  const [copied, setCopied] = React.useState(false);
+  const preRef = React.useRef<HTMLPreElement>(null);
+
+  const dataLanguage = (props as Record<string, unknown>)["data-language"] as string | undefined;
+
+  const handleCopy = async () => {
+    if (preRef.current) {
+      const code = preRef.current.textContent || "";
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <div className="group relative mt-6 mb-4 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+      {/* Header bar */}
+      <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
+        <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+          {dataLanguage || "code"}
+        </span>
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+          aria-label="Copy code"
+        >
+          {copied ? (
+            <>
+              <Check className="w-3.5 h-3.5 text-green-500" />
+              <span className="text-green-500">Copied</span>
+            </>
+          ) : (
+            <>
+              <Copy className="w-3.5 h-3.5" />
+              <span>Copy</span>
+            </>
+          )}
+        </button>
+      </div>
+      {/* Code content */}
+      <pre
+        ref={preRef}
+        className={cn(
+          "overflow-x-auto bg-zinc-950 p-4 text-sm",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </pre>
+    </div>
+  );
+}
 
 const components = {
   h1: ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
@@ -75,15 +131,7 @@ const components = {
       {...props}
     />
   ),
-  pre: ({ className, ...props }: React.HTMLAttributes<HTMLPreElement>) => (
-    <pre
-      className={cn(
-        "mt-6 mb-4 overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-950 p-4",
-        className
-      )}
-      {...props}
-    />
-  ),
+  pre: CodeBlock,
   a: ({ className, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a
       className={cn("font-medium text-green-500 underline underline-offset-4 hover:text-green-400", className)}

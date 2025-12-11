@@ -35,6 +35,19 @@
   body {
     @apply bg-white dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50;
   }
+
+  /* Fix rehype-pretty-code nested code element background */
+  pre > code {
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  /* Ensure code blocks have consistent styling */
+  pre [data-line] {
+    padding-left: 0;
+    padding-right: 1rem;
+  }
 }
 
 @layer utilities {
