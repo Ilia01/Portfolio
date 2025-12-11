@@ -6,7 +6,6 @@ import { Experience } from "@/components/sections/experience";
 import { Projects } from "@/components/sections/projects";
 import { Skills } from "@/components/sections/skills";
 import { About } from "@/components/sections/about";
-import { Contact } from "@/components/sections/contact";
 import { Footer } from "@/components/footer";
 import { FloatingContact } from "@/components/floating-contact";
 import { KonamiCode } from "@/components/konami-code";
@@ -21,7 +20,6 @@ export default function Home() {
         <Projects />
         <Skills />
         <About />
-        <Contact />
       </main>
       <Footer />
       <FloatingContact />
