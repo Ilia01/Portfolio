@@ -1,611 +1,93 @@
 ---
-title: "Zero-Cost Docker Deployment: Learning Production Patterns"
-description: "Guide to deploying a Node.js app with Docker, PostgreSQL, and Redis using free tier services. Learning deployment without spending money."
+title: "Deploying on Free Tier: What Actually Works"
+description: "I wanted to deploy Aegis2FA without paying for hosting. Here's the stack I ended up with."
 date: 2025-01-02
 published: true
 tags: ["docker", "deployment", "devops", "backend"]
 ---
 
-## The Learning Challenge
+I wanted to deploy Aegis2FA somewhere real, not just run it locally. But I didn't want to pay for hosting for a learning project.
 
-I wanted to deploy Aegis2FA to understand production deployment patterns without spending money. The goal:
-- **PostgreSQL** database
-- **Redis** for caching and rate limiting
-- **Node.js** backend
-- **HTTPS** with SSL
-- **Monitoring** and health checks
-- **$0/month** cost (free tiers only)
-
-Here's what actually works in free tiers.
+Turns out, you can run a full Node.js app with PostgreSQL and Redis for $0/month if you're willing to work within free tier limits.
 
 ## The Stack
 
-- **Docker** - Containerization
-- **Docker Compose** - Multi-container orchestration
-- **Fly.io** - Free tier (3 VMs, 3GB storage)
-- **Supabase** - Free PostgreSQL (500MB)
-- **Upstash** - Free Redis (10K commands/day)
-- **Let's Encrypt** - Free SSL certificates
+- **Fly.io** for the Node.js app (3 free VMs)
+- **Supabase** for PostgreSQL (500MB free)
+- **Upstash** for Redis (10K commands/day free)
 
-## Docker Configuration
+That's enough for a learning project or low-traffic side project.
 
-### Backend Dockerfile
+## The Docker Part
+
+I spent too long on the Dockerfile before realizing most of it doesn't matter for a small project. Here's what I actually care about:
 
 ```dockerfile
-# Multi-stage build for smaller images
-FROM node:20-alpine AS builder
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-COPY prisma ./prisma/
-
-# Install dependencies
-RUN npm ci
-
-# Copy source code
-COPY . .
-
-# Generate Prisma client
-RUN npx prisma generate
-
-# Build TypeScript
-RUN npm run build
-
-# Production stage
 FROM node:20-alpine
 
 WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY dist ./dist
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
-
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
-
-# Copy built app and dependencies
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nodejs:nodejs /app/prisma ./prisma
-COPY --chown=nodejs:nodejs package*.json ./
-
-USER nodejs
-
-EXPOSE 3000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"
-
-# Use dumb-init to handle signals properly
-ENTRYPOINT ["dumb-init", "--"]
+# Don't run as root
+RUN adduser -D appuser
+USER appuser
 
 CMD ["node", "dist/main.js"]
 ```
 
-### Optimizations
+Multi-stage builds are nice for reducing image size, but for a learning project, a simple Dockerfile is fine. I got it down to ~150MB which is good enough.
 
-```dockerfile
-# .dockerignore
-node_modules
-npm-debug.log
-.env
-.env.local
-dist
-coverage
-.git
-.github
-*.md
-tests
-.vscode
-.idea
-```
+## Docker Compose for Local Dev
 
-This reduced build from 2GB to 150MB!
-
-## Docker Compose for Local Development
+This is the part that actually saved me time:
 
 ```yaml
-version: '3.8'
-
 services:
-  # PostgreSQL database
   postgres:
     image: postgres:15-alpine
-    container_name: aegis2fa-postgres
     environment:
       POSTGRES_DB: aegis2fa
-      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - '5432:5432'
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
-  # Redis cache
   redis:
     image: redis:7-alpine
-    container_name: aegis2fa-redis
-    command: redis-server --appendonly yes
     ports:
       - '6379:6379'
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 10s
-      timeout: 3s
-      retries: 5
-
-  # API backend
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: aegis2fa-api
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/aegis2fa
-      REDIS_URL: redis://redis:6379
-      JWT_ACCESS_SECRET: dev-secret-access
-      JWT_REFRESH_SECRET: dev-secret-refresh
-      PORT: 3000
-    ports:
-      - '3000:3000'
-    volumes:
-      - ./src:/app/src
-      - ./prisma:/app/prisma
-    command: npm run dev
-    restart: unless-stopped
-    healthcheck:
-      test: ['CMD', 'node', '-e', "require('http').get('http://localhost:3000/health')"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-
-  # Nginx reverse proxy (optional for local dev)
-  nginx:
-    image: nginx:alpine
-    container_name: aegis2fa-nginx
-    depends_on:
-      - api
-    ports:
-      - '80:80'
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    restart: unless-stopped
-
-volumes:
-  postgres-data:
-  redis-data:
 ```
 
-### Running Locally
+One `docker compose up` and I have the same databases locally that I use in production. No "works on my machine" issues.
+
+## Deploying to Fly.io
+
+Fly.io has a CLI that makes deployment pretty painless:
 
 ```bash
-# Start all services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f api
-
-# Run migrations
-docker-compose exec api npx prisma migrate deploy
-
-# Stop services
-docker-compose down
-
-# Clean up (including volumes)
-docker-compose down -v
+fly launch
+fly secrets set DATABASE_URL="..." REDIS_URL="..."
+fly deploy
 ```
 
-## Production Deployment on Fly.io
+The free tier gives you 3 shared VMs. The catch is they spin down after inactivity and take a few seconds to wake up. Fine for a portfolio project, annoying for anything real.
 
-### fly.toml Configuration
+## What I Learned
 
-```toml
-app = "aegis2fa"
-primary_region = "iad"
+**Free tiers have limits that matter.** Supabase's 500MB sounds like a lot until you realize Prisma migrations and indexes add up. Upstash's 10K commands/day is fine for low traffic but would run out quickly under load.
 
-[build]
-  dockerfile = "Dockerfile"
+**Health checks are worth setting up.** Fly.io can restart your app if it crashes, but only if you have a health endpoint it can ping.
 
-[env]
-  NODE_ENV = "production"
-  PORT = "8080"
+**Environment variables everywhere.** I should have used them from the start instead of hardcoding connection strings. Made deployment way easier once I fixed it.
 
-[http_service]
-  internal_port = 8080
-  force_https = true
-  auto_stop_machines = false
-  auto_start_machines = true
-  min_machines_running = 1
+## Cost If You Outgrow Free Tier
 
-  [[http_service.checks]]
-    grace_period = "10s"
-    interval = "30s"
-    method = "GET"
-    timeout = "5s"
-    path = "/health"
+If the project ever got real traffic:
+- Fly.io: ~$5/month for a dedicated VM
+- Supabase: $25/month for more storage
+- Upstash: $10/month for more commands
 
-[[vm]]
-  cpu_kind = "shared"
-  cpus = 1
-  memory_mb = 256
+About $40/month total. Not bad, but free is nicer for something nobody's using.
 
-[metrics]
-  port = 9091
-  path = "/metrics"
-```
-
-### Deploy Script
-
-```bash
-#!/bin/bash
-set -e
-
-echo "Deploying Aegis2FA to Fly.io..."
-
-# Set secrets (one-time)
-fly secrets set \
-  DATABASE_URL="postgresql://user:pass@host:5432/db" \
-  REDIS_URL="rediss://default:pass@host:6379" \
-  JWT_ACCESS_SECRET="$(openssl rand -base64 32)" \
-  JWT_REFRESH_SECRET="$(openssl rand -base64 32)" \
-  ENCRYPTION_KEY="$(openssl rand -hex 32)"
-
-# Run database migrations
-fly ssh console -C "npx prisma migrate deploy"
-
-# Deploy app
-fly deploy --ha=false
-
-# Verify deployment
-fly status
-
-echo "Deployment complete!"
-echo "App available at: https://aegis2fa.fly.dev"
-```
-
-### Setting Up Free Database (Supabase)
-
-```bash
-# 1. Sign up at supabase.com (free)
-# 2. Create new project
-# 3. Get connection string from Settings > Database
-
-# Example connection string:
-DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT].supabase.co:5432/postgres"
-```
-
-### Setting Up Free Redis (Upstash)
-
-```bash
-# 1. Sign up at upstash.com (free)
-# 2. Create new database
-# 3. Get connection string
-
-# Example connection string:
-REDIS_URL="rediss://default:[PASSWORD]@[ENDPOINT].upstash.io:6379"
-```
-
-## Health Checks
-
-### Health Check Endpoint
-
-```typescript
-// src/routes/health.ts
-import { Router } from 'express';
-import { db } from '../db';
-import { redis } from '../redis';
-
-const router = Router();
-
-router.get('/health', async (req, res) => {
-  const health = {
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    checks: {
-      database: 'unknown',
-      redis: 'unknown',
-      memory: process.memoryUsage(),
-    },
-  };
-
-  try {
-    // Check database
-    await db.$queryRaw`SELECT 1`;
-    health.checks.database = 'ok';
-  } catch (error) {
-    health.checks.database = 'error';
-    health.status = 'degraded';
-  }
-
-  try {
-    // Check Redis
-    await redis.ping();
-    health.checks.redis = 'ok';
-  } catch (error) {
-    health.checks.redis = 'error';
-    health.status = 'degraded';
-  }
-
-  const statusCode = health.status === 'ok' ? 200 : 503;
-  res.status(statusCode).json(health);
-});
-
-router.get('/ready', async (req, res) => {
-  try {
-    await db.$queryRaw`SELECT 1`;
-    res.status(200).json({ ready: true });
-  } catch (error) {
-    res.status(503).json({ ready: false, error: error.message });
-  }
-});
-
-export default router;
-```
-
-### Kubernetes Readiness/Liveness Probes
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: aegis2fa
-spec:
-  replicas: 2
-  template:
-    spec:
-      containers:
-        - name: api
-          image: aegis2fa:latest
-          ports:
-            - containerPort: 3000
-
-          # Liveness probe - restart if failing
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 3000
-            initialDelaySeconds: 30
-            periodSeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 3
-
-          # Readiness probe - remove from service if failing
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: 3000
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 3
-            failureThreshold: 2
-
-          # Resources
-          resources:
-            requests:
-              memory: "128Mi"
-              cpu: "100m"
-            limits:
-              memory: "256Mi"
-              cpu: "200m"
-
-          # Environment from secrets
-          envFrom:
-            - secretRef:
-                name: aegis2fa-secrets
-```
-
-## Logging and Monitoring
-
-### Structured Logging with Pino
-
-```typescript
-import pino from 'pino';
-
-export const logger = pino({
-  level: process.env.LOG_LEVEL || 'info',
-  transport:
-    process.env.NODE_ENV === 'development'
-      ? {
-          target: 'pino-pretty',
-          options: {
-            colorize: true,
-            ignore: 'pid,hostname',
-            translateTime: 'SYS:standard',
-          },
-        }
-      : undefined,
-  serializers: {
-    req: pino.stdSerializers.req,
-    res: pino.stdSerializers.res,
-    err: pino.stdSerializers.err,
-  },
-});
-
-// Usage
-logger.info('Server started');
-logger.error({ err }, 'Request failed');
-logger.warn({ userId }, 'Rate limit exceeded');
-```
-
-### Prometheus Metrics
-
-```typescript
-import { register, Counter, Histogram, Gauge } from 'prom-client';
-
-// HTTP requests
-const httpRequestDuration = new Histogram({
-  name: 'http_request_duration_seconds',
-  help: 'Duration of HTTP requests in seconds',
-  labelNames: ['method', 'route', 'status'],
-  buckets: [0.1, 0.5, 1, 2, 5],
-});
-
-// Active connections
-const activeConnections = new Gauge({
-  name: 'active_connections',
-  help: 'Number of active connections',
-});
-
-// Failed authentications
-const failedAuth = new Counter({
-  name: 'failed_auth_total',
-  help: 'Total number of failed authentication attempts',
-  labelNames: ['reason'],
-});
-
-// Metrics endpoint
-app.get('/metrics', async (req, res) => {
-  res.set('Content-Type', register.contentType);
-  res.end(await register.metrics());
-});
-```
-
-## Backup Strategy
-
-### Automated Database Backups
-
-```bash
-#!/bin/bash
-# scripts/backup.sh
-
-set -e
-
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_DIR="/backups"
-BACKUP_FILE="$BACKUP_DIR/aegis2fa_$TIMESTAMP.sql.gz"
-
-# Create backup
-pg_dump $DATABASE_URL | gzip > $BACKUP_FILE
-
-# Upload to S3 (or any object storage)
-aws s3 cp $BACKUP_FILE s3://aegis2fa-backups/
-
-# Keep only last 7 days
-find $BACKUP_DIR -name "*.sql.gz" -mtime +7 -delete
-
-echo "Backup complete: $BACKUP_FILE"
-```
-
-### Automated Backup with Cron
-
-```bash
-# Run daily at 2 AM
-0 2 * * * /app/scripts/backup.sh >> /var/log/backup.log 2>&1
-```
-
-## Performance Optimization
-
-### Docker Multi-Stage Builds
-
-Reduced image size from 1.2GB to 150MB:
-
-```dockerfile
-# Development dependencies stay in builder stage
-FROM node:20-alpine AS builder
-RUN npm ci
-
-# Only production dependencies in final image
-FROM node:20-alpine
-COPY --from=builder /app/node_modules ./node_modules
-```
-
-### Layer Caching
-
-```dockerfile
-# Copy package.json first for better caching
-COPY package*.json ./
-RUN npm ci
-
-# Copy source code after
-COPY . .
-RUN npm run build
-```
-
-## Security Best Practices
-
-### Run as Non-Root User
-
-```dockerfile
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
-
-USER nodejs
-```
-
-### Scan for Vulnerabilities
-
-```bash
-# Scan image
-docker scan aegis2fa:latest
-
-# Alternative: Trivy
-trivy image aegis2fa:latest
-```
-
-### Secrets Management
-
-```bash
-# Never hardcode secrets!
-# Use environment variables or secrets management
-
-# Docker secrets (Docker Swarm)
-docker secret create db_password ./db_password.txt
-
-# Kubernetes secrets
-kubectl create secret generic aegis2fa-secrets \
-  --from-literal=database-url=$DATABASE_URL \
-  --from-literal=jwt-secret=$JWT_SECRET
-```
-
-## Results
-
-After 6 months running on free tier:
-
-- **$0/month** hosting costs
-- **99.9% uptime**
-- **Sub-100ms** response times
-- **150MB** Docker image
-- **128MB** RAM usage
-- **Zero security incidents**
-
-## Cost Breakdown (Free Tier)
-
-| Service | Free Tier | Cost |
-|---------|-----------|------|
-| Fly.io | 3 shared VMs, 3GB storage | $0 |
-| Supabase | 500MB PostgreSQL | $0 |
-| Upstash | 10K commands/day Redis | $0 |
-| Cloudflare | CDN + DDoS protection | $0 |
-| Let's Encrypt | SSL certificates | $0 |
-| **Total** | | **$0/month** |
-
-## Scaling Beyond Free Tier
-
-When you outgrow free tier:
-
-**Fly.io** - $2/month per VM
-**Supabase** - $25/month for 8GB database
-**Upstash** - $10/month for 1M commands
-
-Total: ~$40/month for paid tier infrastructure
-
----
-
-*Questions about Docker deployment? Need help with Fly.io? Check the Aegis2FA deployment docs or reach out!*
+The Dockerfile and docker-compose.yml are in the [Aegis2FA repo](https://github.com/Ilia01/Aegis2FA) if you want to see the full setup.

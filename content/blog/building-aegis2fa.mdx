@@ -1,118 +1,48 @@
 ---
-title: "Building Aegis2FA: Learning Authentication the Hard Way"
-description: "How I built a complete 2FA service to understand authentication patterns—TOTP, JWT refresh tokens, Argon2, and rate limiting. A technical deep-dive into what I learned."
+title: "Building Aegis2FA: Why I Built My Own 2FA Service"
+description: "I wanted to actually understand authentication, not just copy-paste from tutorials. So I built a 2FA service from scratch."
 date: 2025-01-15
 published: true
 tags: ["authentication", "security", "backend", "learning"]
 ---
 
-## Why Build This?
+I got tired of not really understanding how authentication works.
 
-I wanted to understand authentication beyond tutorials. How does TOTP actually work? Why is Argon2 better than bcrypt? How do you prevent JWT token theft?
+Every tutorial I read showed me *how* to use Auth0 or Firebase Auth, but never *why* things worked the way they did. What actually happens when you scan that QR code? Why do some sites use 6-digit codes while others use 8? How does your phone know the right code without talking to the server?
 
-The best way to learn is to build. So I built **Aegis2FA**—a complete 2FA service with:
+So I decided to build my own 2FA service. Not to replace Auth0 - just to learn.
 
-- Multiple authentication methods (TOTP, SMS, Email, Backup codes)
-- Modern security patterns (Argon2id, JWT with refresh tokens)
-- Comprehensive documentation
-- 80%+ test coverage
+## What I Built
 
-This isn't production software—it's a learning project that demonstrates real authentication patterns. Here's what I learned building it.
+Aegis2FA is a complete two-factor authentication service with:
 
-## Technical Architecture
+- TOTP (those 6-digit codes from Google Authenticator)
+- Email and SMS verification
+- Backup codes for when you lose your phone
+- JWT tokens with refresh rotation
 
-### Backend Stack
+It's not production software. It's a learning project with tests and documentation so I can reference it later.
 
-```typescript
-// Core authentication flow with NestJS
-@Injectable()
-export class TwoFactorService {
-  async verifyTotp(userId: string, token: string): Promise<boolean> {
-    const user = await this.userRepository.findById(userId);
+## The Parts That Were Harder Than Expected
 
-    // Verify token using speakeasy
-    return speakeasy.totp.verify({
-      secret: user.totpSecret,
-      encoding: 'base32',
-      token,
-      window: 2, // Allow 60-second time skew
-    });
-  }
-}
-```
+**TOTP clock drift** - I assumed phones and servers would have the same time. They don't. Some phones are off by 30+ seconds, which means valid codes get rejected. The fix is simple (accept codes from adjacent time periods), but I didn't think about it until users complained.
 
-### Key Design Decisions
+**Token reuse** - TOTP codes are valid for 30 seconds. What stops someone from using the same code twice within that window? Nothing, unless you track used tokens. I missed this initially.
 
-**Why Argon2id over bcrypt?**
+**Backup codes** - Generating them is easy. The hard part is storing them securely (hashed, not plaintext) while still being able to show the user which codes they've used.
 
-Winner of the Password Hashing Competition, resistant to GPU cracking attacks, with configurable memory and time costs, and better protection against side-channel attacks.
+## What I Actually Learned
 
-**Why JWT with refresh tokens?**
+The biggest lesson: authentication is mostly about handling edge cases. The happy path is straightforward. It's the weird situations that get you:
+- User's phone clock is wrong
+- User loses their device
+- Tokens get intercepted
+- Someone tries the same code twice
 
-Stateless authentication with short-lived access tokens (15min) and long-lived refresh tokens (7 days) stored securely with automatic rotation on use.
+I also learned that Argon2 is better than bcrypt for password hashing (more memory-hard, harder to crack with GPUs), and that JWT refresh token rotation prevents token theft better than long-lived tokens.
 
-## Challenges Faced
+## Now What?
 
-### Race Conditions in Token Generation
+I'm using these patterns at work now. When I see authentication code, I actually understand what it's doing and why. That was the whole point.
 
-**Problem**: Multiple simultaneous requests could generate duplicate tokens.
-
-**Solution**: Implemented Redis-based distributed locking:
-
-```typescript
-async generateBackupCodes(userId: string): Promise<string[]> {
-  const lock = await this.redisClient.acquireLock(`backup:${userId}`, 5000);
-
-  try {
-    // Generate codes with cryptographically secure random
-    const codes = Array.from({ length: 10 }, () =>
-      crypto.randomBytes(4).toString('hex')
-    );
-
-    // Hash and store
-    await this.storeHashedCodes(userId, codes);
-
-    return codes;
-  } finally {
-    await lock.release();
-  }
-}
-```
-
-### SMS Delivery Reliability
-
-**Problem**: SMS providers have varying delivery times and failure rates.
-
-**Solution**: Implemented a fallback queue system with exponential backoff and multiple provider support.
-
-### TOTP Clock Drift
-
-**Problem**: User devices may have inaccurate clocks, causing valid tokens to be rejected.
-
-**Solution**: Added a configurable time window of ±60 seconds and implemented NTP sync recommendations in the client app.
-
-## What I Learned
-
-**Security isn't optional**: Every endpoint needs rate limiting. Every password needs proper hashing. Every token needs validation. No shortcuts.
-
-**Documentation teaches you**: Writing docs for Aegis2FA forced me to understand edge cases I'd missed. If you can't explain it clearly, you don't fully understand it.
-
-**Tests catch real bugs**: Integration tests found 3 race conditions I would've shipped. Token reuse vulnerability caught by a simple test. Password length DoS attack prevented because someone wrote a test with 10,000 character passwords.
-
-**Production patterns matter**: Even in a learning project, using real patterns (JWT rotation, distributed locks, structured logging) teaches you how production systems actually work.
-
-## Applying These Lessons
-
-I'm now using these authentication patterns in production systems at Andersen. Understanding TOTP internals, JWT security, and rate limiting strategies helps me make better architecture decisions for real projects.
-
-## What's Next
-
-Planning to add WebAuthn/FIDO2 support for passwordless authentication and an admin dashboard. These features will give me hands-on experience with modern auth standards.
-
-## Try It Yourself
-
-Check out the project on GitHub at github.com/Ilia01/Aegis2FA, read the full documentation at ilia01.github.io/Aegis2FA, or try the interactive demo without signing up.
-
----
-
-*Have questions about the implementation? Found a bug? Open an issue on GitHub or reach out via email.*
+The code is on [GitHub](https://github.com/Ilia01/Aegis2FA) if you want to look through it.

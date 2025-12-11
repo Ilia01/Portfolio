@@ -1,353 +1,56 @@
 ---
-title: "Implementing TOTP Authentication: A Deep Dive"
-description: "Complete guide to implementing Time-based One-Time Password authentication with proper security, clock drift handling, and QR code generation."
+title: "How TOTP Actually Works"
+description: "I implemented TOTP from scratch to understand what happens when you scan that QR code. Here's what I learned."
 date: 2025-01-10
 published: true
 tags: ["authentication", "security", "totp", "2fa"]
 ---
 
-## What is TOTP?
+I always wondered what actually happens when you scan a QR code in Google Authenticator. So I built it from scratch.
 
-Time-based One-Time Password (TOTP) is an algorithm that generates a one-time password using the current time as a source of uniqueness. It's the technology behind authenticator apps like Google Authenticator, Authy, and Microsoft Authenticator.
+## The Basic Idea
 
-## Why TOTP Over SMS?
+TOTP is surprisingly simple. You and the server share a secret. You both use that secret plus the current time to generate a 6-digit code. Since you're using the same inputs, you get the same output.
 
-SMS 2FA has several vulnerabilities:
-- **SIM swapping attacks** - Attackers can hijack phone numbers
-- **SS7 protocol vulnerabilities** - Network-level attacks
-- **Phishing** - Users can be tricked into sharing codes
-- **Delivery delays** - SMS can be delayed or never arrive
+That's it. No network calls from your phone to the server. Just math.
 
-TOTP solves these issues by generating codes locally on the user's device using a shared secret.
+## The Tricky Parts
 
-## The TOTP Algorithm
+**Clock drift** was the first thing that bit me. I tested everything locally, it worked perfectly, then tried it on my phone and codes kept failing. My phone's clock was 40 seconds off.
 
-TOTP is defined in RFC 6238 and builds on HMAC-based One-Time Password (HOTP, RFC 4226). Here's how it works:
+The fix is accepting codes from neighboring time windows. Most implementations accept the previous and next 30-second window too, giving you a 90-second buffer.
 
-### Step 1: Generate a Shared Secret
+**Token reuse** is something I didn't think about initially. A code is valid for 30 seconds. What stops someone from using it twice? Nothing, unless you track used codes. I added a Redis cache to store recently used tokens and reject duplicates.
+
+## The Code
+
+I used the `speakeasy` library. The core is about 20 lines:
 
 ```typescript
-import crypto from 'crypto';
 import speakeasy from 'speakeasy';
 
-function generateSecret(userId: string) {
-  const secret = speakeasy.generateSecret({
-    length: 32,
-    name: `Aegis2FA (${userId})`,
-    issuer: 'Aegis2FA',
-  });
-
-  return {
-    base32: secret.base32,
-    otpauthUrl: secret.otpauth_url,
-  };
-}
-```
-
-The secret is a random 32-byte value encoded in Base32. This secret is shared between the server and the client app.
-
-### Step 2: Generate QR Code
-
-```typescript
-import QRCode from 'qrcode';
-
-async function generateQRCode(otpauthUrl: string): Promise<string> {
-  // Generate data URL for QR code
-  const qrDataUrl = await QRCode.toDataURL(otpauthUrl, {
-    errorCorrectionLevel: 'H',
-    type: 'image/png',
-    width: 300,
-    margin: 1,
-  });
-
-  return qrDataUrl;
-}
-```
-
-The `otpauth://` URL format contains:
-- Protocol: `otpauth://totp/`
-- Issuer: Your app name
-- Account: User identifier
-- Secret: The Base32 secret
-- Algorithm: SHA1 (default), SHA256, or SHA512
-
-### Step 3: Verify TOTP Tokens
-
-```typescript
-function verifyTotp(
-  userSecret: string,
-  token: string,
-  window: number = 1
-): boolean {
-  return speakeasy.totp.verify({
-    secret: userSecret,
-    encoding: 'base32',
-    token,
-    window, // Allow ±30 seconds
-  });
-}
-```
-
-## Handling Clock Drift
-
-One of the biggest challenges with TOTP is clock synchronization. User devices may have incorrect time settings.
-
-### The Window Parameter
-
-The `window` parameter allows tokens from adjacent time periods to be valid:
-
-- `window = 0`: Only current time period (30 seconds)
-- `window = 1`: Current period ± 1 period (90 seconds total)
-- `window = 2`: Current period ± 2 periods (150 seconds total)
-
-**Recommendation**: Use `window = 1` for a balance between security and usability.
-
-### Implementation Details
-
-```typescript
-interface TotpVerificationResult {
-  valid: boolean;
-  delta?: number; // Time periods away from current
-}
-
-function verifyTotpWithDelta(
-  secret: string,
-  token: string
-): TotpVerificationResult {
-  const result = speakeasy.totp.verifyDelta({
-    secret,
-    encoding: 'base32',
-    token,
-    window: 2,
-  });
-
-  if (result && typeof result === 'object') {
-    return { valid: true, delta: result.delta };
-  }
-
-  return { valid: false };
-}
-```
-
-## Security Considerations
-
-### 1. Rate Limiting
-
-Implement aggressive rate limiting on TOTP verification:
-
-```typescript
-import rateLimit from 'express-rate-limit';
-
-const totpRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts per window
-  message: 'Too many verification attempts, please try again later',
-  standardHeaders: true,
-  legacyHeaders: false,
+// Generate a secret when user enables 2FA
+const secret = speakeasy.generateSecret({
+  name: 'MyApp (user@email.com)',
 });
 
-router.post('/verify-totp', totpRateLimiter, verifyTotpHandler);
-```
-
-### 2. Secret Storage
-
-Never store TOTP secrets in plaintext:
-
-```typescript
-import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
-
-const ALGORITHM = 'aes-256-gcm';
-const KEY = process.env.ENCRYPTION_KEY; // 32 bytes
-
-function encryptSecret(secret: string): {
-  encrypted: string;
-  iv: string;
-  tag: string;
-} {
-  const iv = randomBytes(16);
-  const cipher = createCipheriv(ALGORITHM, Buffer.from(KEY, 'hex'), iv);
-
-  let encrypted = cipher.update(secret, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-
-  const tag = cipher.getAuthTag();
-
-  return {
-    encrypted,
-    iv: iv.toString('hex'),
-    tag: tag.toString('hex'),
-  };
-}
-
-function decryptSecret(
-  encrypted: string,
-  iv: string,
-  tag: string
-): string {
-  const decipher = createDecipheriv(
-    ALGORITHM,
-    Buffer.from(KEY, 'hex'),
-    Buffer.from(iv, 'hex')
-  );
-
-  decipher.setAuthTag(Buffer.from(tag, 'hex'));
-
-  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
-
-  return decrypted;
-}
-```
-
-### 3. Token Reuse Prevention
-
-Implement a token cache to prevent replay attacks:
-
-```typescript
-import Redis from 'ioredis';
-
-const redis = new Redis(process.env.REDIS_URL);
-
-async function isTokenUsed(
-  userId: string,
-  token: string
-): Promise<boolean> {
-  const key = `totp:${userId}:${token}`;
-  const exists = await redis.exists(key);
-  return exists === 1;
-}
-
-async function markTokenAsUsed(
-  userId: string,
-  token: string
-): Promise<void> {
-  const key = `totp:${userId}:${token}`;
-  // Expire after 90 seconds (window = 1)
-  await redis.setex(key, 90, '1');
-}
-
-async function verifyTotpOnce(
-  userId: string,
-  secret: string,
-  token: string
-): Promise<boolean> {
-  // Check if token already used
-  if (await isTokenUsed(userId, token)) {
-    return false;
-  }
-
-  // Verify token
-  const valid = verifyTotp(secret, token);
-
-  if (valid) {
-    // Mark as used
-    await markTokenAsUsed(userId, token);
-  }
-
-  return valid;
-}
-```
-
-## Testing TOTP Implementation
-
-### Unit Tests
-
-```typescript
-import { describe, it, expect } from 'vitest';
-
-describe('TOTP Verification', () => {
-  it('should verify valid token', () => {
-    const secret = 'JBSWY3DPEHPK3PXP';
-    const token = speakeasy.totp({
-      secret,
-      encoding: 'base32',
-    });
-
-    const result = verifyTotp(secret, token);
-    expect(result).toBe(true);
-  });
-
-  it('should reject old token', () => {
-    const secret = 'JBSWY3DPEHPK3PXP';
-    const oldToken = speakeasy.totp({
-      secret,
-      encoding: 'base32',
-      time: Date.now() / 1000 - 120, // 2 minutes ago
-    });
-
-    const result = verifyTotp(secret, oldToken, 1);
-    expect(result).toBe(false);
-  });
-
-  it('should accept token within window', () => {
-    const secret = 'JBSWY3DPEHPK3PXP';
-    const nearToken = speakeasy.totp({
-      secret,
-      encoding: 'base32',
-      time: Date.now() / 1000 - 35, // 35 seconds ago
-    });
-
-    const result = verifyTotp(secret, nearToken, 1);
-    expect(result).toBe(true);
-  });
+// Verify a token they enter
+const valid = speakeasy.totp.verify({
+  secret: secret.base32,
+  encoding: 'base32',
+  token: userInput,
+  window: 1, // Accept ±30 seconds
 });
 ```
 
-## Common Pitfalls
+The `window: 1` handles clock drift. I tried `window: 2` initially (150 seconds) but that felt too permissive for a security feature.
 
-### 1. Not Handling Backup Codes
+## What I'd Do Differently
 
-Always provide backup codes when enabling TOTP:
+**Start with backup codes.** I added them as an afterthought, but users will lose access to their authenticator app. It's not an edge case.
 
-```typescript
-function generateBackupCodes(count: number = 10): string[] {
-  const codes: string[] = [];
+**Show the manual entry option.** Some people can't scan QR codes (corporate phones, accessibility). Always show the Base32 secret as text.
 
-  for (let i = 0; i < count; i++) {
-    const code = crypto
-      .randomBytes(4)
-      .toString('hex')
-      .match(/.{1,4}/g)
-      ?.join('-') || '';
-    codes.push(code);
-  }
+**Log failed attempts.** When I finally added logging, I saw patterns I wouldn't have noticed otherwise.
 
-  return codes;
-}
-```
-
-### 2. Poor User Experience
-
-Show time remaining for current token:
-
-```typescript
-function getTimeRemaining(): number {
-  const epoch = Math.floor(Date.now() / 1000);
-  const period = 30;
-  return period - (epoch % period);
-}
-```
-
-### 3. Not Testing With Real Authenticator Apps
-
-Always test with actual apps (Google Authenticator, Authy) before deploying.
-
-## Lessons Learned
-
-After implementing TOTP in Aegis2FA:
-
-**Set window to 1, not 2**: Window of 2 (150 seconds) is too permissive and reduces security significantly.
-
-**Always provide backup codes**: Users will lose access to their authenticator app. Plan for it.
-
-**Show visual feedback**: Display the QR code immediately and provide a manual entry option.
-
-**Log failed attempts**: Track failed TOTP attempts for security monitoring.
-
-## Next Steps
-
-In the next post, I'll cover implementing backup codes and recovery flows for when users lose access to their authenticator apps.
-
----
-
-*Questions about TOTP implementation? Found an edge case I missed? Reach out via email or open an issue on GitHub.*
+The full implementation is in [Aegis2FA](https://github.com/Ilia01/Aegis2FA) if you want to see how it all fits together.

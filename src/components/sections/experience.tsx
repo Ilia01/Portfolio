@@ -13,13 +13,10 @@ export function Experience() {
           viewport={{ once: true }}
           className="mb-12"
         >
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-green-400 font-mono text-xl">$</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white">
-              cat experience.log
-            </h2>
-          </div>
-          <p className="text-zinc-600 dark:text-zinc-400 font-mono text-sm sm:text-base">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-3">
+            Experience
+          </h2>
+          <p className="text-zinc-600 dark:text-zinc-400 text-sm sm:text-base">
             Professional experience and team leadership
           </p>
         </motion.div>
@@ -43,13 +40,13 @@ export function Experience() {
                     href="https://andersenlab.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-green-400 font-mono hover:text-green-300 transition-colors inline-flex items-center gap-1"
+                    className="text-green-500 hover:text-green-400 transition-colors inline-flex items-center gap-1"
                   >
                     {exp.company}
                     <span className="text-xs">↗</span>
                   </a>
                 </div>
-                <div className="text-sm text-zinc-600 dark:text-zinc-400 font-mono mt-2 md:mt-0">
+                <div className="text-sm text-zinc-600 dark:text-zinc-400 mt-2 md:mt-0">
                   {exp.period} · {exp.location}
                 </div>
               </div>
@@ -74,7 +71,7 @@ export function Experience() {
                 {exp.technologies.map((tech, tIndex) => (
                   <span
                     key={tIndex}
-                    className="px-3 py-1 text-xs rounded-full bg-green-500/10 text-green-400 border border-green-500/20 font-mono"
+                    className="px-3 py-1 text-xs rounded-full bg-green-500/10 text-green-500 border border-green-500/20"
                   >
                     {tech}
                   </span>

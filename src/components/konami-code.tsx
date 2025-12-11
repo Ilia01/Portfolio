@@ -17,23 +17,20 @@ const KONAMI_CODE = [
 ];
 
 export function KonamiCode() {
-  const [input, setInput] = useState<string[]>([]);
   const [activated, setActivated] = useState(false);
 
   useEffect(() => {
+    let input: string[] = [];
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      setInput((prev) => {
-        const newInput = [...prev, e.key].slice(-KONAMI_CODE.length);
+      input = [...input, e.key].slice(-KONAMI_CODE.length);
 
-        // Check if Konami code is entered
-        if (newInput.join(",") === KONAMI_CODE.join(",")) {
-          setActivated(true);
-          setTimeout(() => setActivated(false), 5000);
-          return [];
-        }
-
-        return newInput;
-      });
+      // Check if Konami code is entered
+      if (input.join(",") === KONAMI_CODE.join(",")) {
+        setActivated(true);
+        setTimeout(() => setActivated(false), 5000);
+        input = [];
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -95,10 +92,10 @@ export function KonamiCode() {
                   You found the Konami Code!
                 </p>
                 <div className="text-sm text-zinc-500 font-mono">
-                  <p>30 extra lives granted 💚</p>
-                  <p className="mt-2">You&apos;re a true gamer!</p>
+                  <p>30 bonus points for curiosity 💚</p>
+                  <p className="mt-2">Achievement: Curiosity Expert!</p>
                   <p className="mt-4 text-xs">
-                    (BTW I use Arch, and apparently you use cheat codes 😏)
+                    Easter egg hunters make the best developers
                   </p>
                 </div>
               </div>

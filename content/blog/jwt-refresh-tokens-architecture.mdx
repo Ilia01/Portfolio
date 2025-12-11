@@ -1,568 +1,83 @@
 ---
-title: "Building a Secure JWT Authentication System with Refresh Tokens"
-description: "Learn how to implement stateless JWT authentication with refresh tokens, automatic rotation, and proper security measures for production apps."
+title: "JWT Refresh Tokens: The Architecture I Settled On"
+description: "After trying several approaches, here's how I handle auth tokens in Aegis2FA and why."
 date: 2025-01-12
 published: true
 tags: ["authentication", "jwt", "security", "backend"]
 ---
 
-## The Authentication Challenge
+I went through three different token architectures before landing on one that actually made sense.
 
-When building Aegis2FA, I needed an authentication system that was:
-- **Stateless** - No session storage required
-- **Scalable** - Works across multiple servers
-- **Secure** - Resistant to token theft and replay attacks
-- **User-friendly** - No constant re-authentication
+## The Problem
 
-The solution: JWT access tokens + HttpOnly refresh tokens.
+Short-lived tokens are more secure (less time for attackers to use stolen tokens) but annoying for users (constant re-login). Long-lived tokens are convenient but risky.
 
-## The Two-Token System
+The solution most people land on: two tokens.
 
-### Access Tokens (Short-lived)
+## What I Use Now
 
-```typescript
-interface AccessTokenPayload {
-  sub: string;        // User ID
-  email: string;
-  role: 'user' | 'admin';
-  iat: number;        // Issued at
-  exp: number;        // Expires at (15 minutes)
-}
-```
+**Access token:** 15 minutes, sent in Authorization header, stored in memory (not localStorage).
 
-**Properties:**
-- Valid for 15 minutes
-- Sent in Authorization header
-- Used for API requests
-- Stored in memory (not localStorage!)
+**Refresh token:** 7 days, HttpOnly cookie, stored in database.
 
-### Refresh Tokens (Long-lived)
+The access token is stateless. The server just validates the signature and expiry. No database lookup.
+
+The refresh token is stateful. It's in the database, so I can revoke it. When a user logs out or I detect something suspicious, I delete their refresh tokens and they're immediately locked out.
+
+## The Key Insight
+
+**Rotate refresh tokens on every use.**
+
+Old token → verify → delete from database → issue new tokens
+
+This means if an attacker steals a refresh token and tries to use it after you've already used it, the token won't exist in the database. I can detect something is wrong and revoke everything.
 
 ```typescript
-interface RefreshTokenPayload {
-  sub: string;        // User ID
-  tokenId: string;    // Unique token ID
-  iat: number;
-  exp: number;        // Expires at (7 days)
-}
-```
+async function refresh(oldToken: string) {
+  const payload = jwt.verify(oldToken, REFRESH_SECRET);
 
-**Properties:**
-- Valid for 7 days
-- Stored in HttpOnly cookie
-- Used to get new access tokens
-- Automatically rotated on use
-
-## Implementation
-
-### Token Generation
-
-```typescript
-import jwt from 'jsonwebtoken';
-import { randomUUID } from 'crypto';
-
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
-
-export function generateAccessToken(user: User): string {
-  const payload: AccessTokenPayload = {
-    sub: user.id,
-    email: user.email,
-    role: user.role,
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 15 * 60, // 15 minutes
-  };
-
-  return jwt.sign(payload, ACCESS_SECRET, {
-    algorithm: 'HS256',
-  });
-}
-
-export function generateRefreshToken(userId: string): {
-  token: string;
-  tokenId: string;
-} {
-  const tokenId = randomUUID();
-
-  const payload: RefreshTokenPayload = {
-    sub: userId,
-    tokenId,
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 7 days
-  };
-
-  const token = jwt.sign(payload, REFRESH_SECRET, {
-    algorithm: 'HS256',
+  // Check database
+  const stored = await db.refreshToken.findUnique({
+    where: { id: payload.tokenId }
   });
 
-  return { token, tokenId };
-}
-```
-
-### Login Flow
-
-```typescript
-import { Response } from 'express';
-import argon2 from 'argon2';
-
-export async function login(
-  email: string,
-  password: string,
-  res: Response
-): Promise<{ accessToken: string; user: UserDto }> {
-  // Find user
-  const user = await db.user.findUnique({
-    where: { email },
-  });
-
-  if (!user) {
-    throw new UnauthorizedException('Invalid credentials');
+  if (!stored) {
+    // Token was already used or revoked
+    // Possible theft - revoke all tokens for this user
+    await db.refreshToken.deleteMany({ where: { userId: payload.sub } });
+    throw new Error('Invalid token');
   }
 
-  // Verify password
-  const valid = await argon2.verify(user.passwordHash, password);
-  if (!valid) {
-    throw new UnauthorizedException('Invalid credentials');
-  }
-
-  // Check if 2FA is enabled
-  if (user.totpEnabled) {
-    // Return partial token, require 2FA verification
-    return {
-      requires2FA: true,
-      tempToken: generateTempToken(user.id),
-    };
-  }
-
-  // Generate tokens
-  const accessToken = generateAccessToken(user);
-  const { token: refreshToken, tokenId } = generateRefreshToken(user.id);
-
-  // Store refresh token in database
-  await db.refreshToken.create({
-    data: {
-      id: tokenId,
-      userId: user.id,
-      token: await hashToken(refreshToken),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    },
-  });
-
-  // Set HttpOnly cookie
-  res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    path: '/api/auth/refresh',
-  });
+  // Delete old, create new
+  await db.refreshToken.delete({ where: { id: payload.tokenId } });
+  const newToken = createRefreshToken(payload.sub);
+  await db.refreshToken.create({ ... });
 
   return {
-    accessToken,
-    user: sanitizeUser(user),
+    accessToken: createAccessToken(payload.sub),
+    refreshToken: newToken
   };
 }
 ```
 
-### Token Refresh Flow
+## What Didn't Work
 
-```typescript
-export async function refresh(
-  oldRefreshToken: string,
-  res: Response
-): Promise<{ accessToken: string }> {
-  // Verify refresh token
-  let payload: RefreshTokenPayload;
-  try {
-    payload = jwt.verify(oldRefreshToken, REFRESH_SECRET) as RefreshTokenPayload;
-  } catch (error) {
-    throw new UnauthorizedException('Invalid refresh token');
-  }
+**Storing access tokens in localStorage:** XSS can read them. Just don't.
 
-  // Check if token exists in database
-  const storedToken = await db.refreshToken.findUnique({
-    where: { id: payload.tokenId },
-    include: { user: true },
-  });
+**Long-lived access tokens:** If you need to revoke access immediately (user reports account compromise), you can't. The token is valid until it expires.
 
-  if (!storedToken) {
-    // Token was revoked or never existed
-    throw new UnauthorizedException('Token revoked');
-  }
+**Refresh tokens without rotation:** An attacker with a stolen refresh token can use it indefinitely. With rotation, they get one use before I notice.
 
-  // Verify hash matches
-  const valid = await verifyToken(oldRefreshToken, storedToken.token);
-  if (!valid) {
-    // Possible token theft - revoke all tokens
-    await revokeAllUserTokens(payload.sub);
-    throw new UnauthorizedException('Invalid token');
-  }
+## The Frontend Part
 
-  // Delete old refresh token
-  await db.refreshToken.delete({
-    where: { id: payload.tokenId },
-  });
+The annoying part is the frontend needs to handle token expiry gracefully. I use an Axios interceptor that catches 401s, refreshes the token, and retries the original request.
 
-  // Generate new tokens
-  const accessToken = generateAccessToken(storedToken.user);
-  const { token: newRefreshToken, tokenId } = generateRefreshToken(payload.sub);
+Users never see a login screen unless their refresh token actually expires (7 days of inactivity).
 
-  // Store new refresh token
-  await db.refreshToken.create({
-    data: {
-      id: tokenId,
-      userId: payload.sub,
-      token: await hashToken(newRefreshToken),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    },
-  });
+## Things I Still Think About
 
-  // Set new cookie
-  res.cookie('refreshToken', newRefreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    path: '/api/auth/refresh',
-  });
+Is 15 minutes too short for access tokens? Maybe. Some apps use 1 hour. But 15 minutes means if a token leaks, the window for abuse is small.
 
-  return { accessToken };
-}
-```
+Is 7 days too long for refresh tokens? For a learning project, it's fine. For a banking app, I'd probably go shorter.
 
-### Authentication Middleware
-
-```typescript
-import { Request, Response, NextFunction } from 'express';
-
-export interface AuthRequest extends Request {
-  user?: AccessTokenPayload;
-}
-
-export function authenticate(
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader?.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'No token provided' });
-  }
-
-  const token = authHeader.substring(7);
-
-  try {
-    const payload = jwt.verify(token, ACCESS_SECRET) as AccessTokenPayload;
-    req.user = payload;
-    next();
-  } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
-      return res.status(401).json({
-        error: 'Token expired',
-        code: 'TOKEN_EXPIRED',
-      });
-    }
-
-    return res.status(401).json({ error: 'Invalid token' });
-  }
-}
-```
-
-## Security Best Practices
-
-### 1. Token Storage
-
-**Access Token:**
-```typescript
-// Frontend - Store in memory only
-let accessToken: string | null = null;
-
-export function setAccessToken(token: string) {
-  accessToken = token;
-}
-
-export function getAccessToken(): string | null {
-  return accessToken;
-}
-
-// Never localStorage.setItem('accessToken', ...) !!
-```
-
-**Refresh Token:**
-```typescript
-// Backend - HttpOnly cookie only
-res.cookie('refreshToken', token, {
-  httpOnly: true,     // Not accessible via JavaScript
-  secure: true,       // HTTPS only
-  sameSite: 'strict', // CSRF protection
-  path: '/api/auth/refresh', // Limit scope
-});
-```
-
-### 2. Token Rotation
-
-Always rotate refresh tokens on use:
-
-```typescript
-async function rotateRefreshToken(
-  oldTokenId: string,
-  userId: string
-): Promise<string> {
-  // Delete old token
-  await db.refreshToken.delete({
-    where: { id: oldTokenId },
-  });
-
-  // Generate new token
-  const { token, tokenId } = generateRefreshToken(userId);
-
-  // Store new token
-  await db.refreshToken.create({
-    data: {
-      id: tokenId,
-      userId,
-      token: await hashToken(token),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    },
-  });
-
-  return token;
-}
-```
-
-### 3. Token Revocation
-
-Implement token revocation for logout and security:
-
-```typescript
-export async function logout(userId: string, tokenId: string): Promise<void> {
-  // Delete specific token
-  await db.refreshToken.delete({
-    where: { id: tokenId },
-  });
-}
-
-export async function logoutAll(userId: string): Promise<void> {
-  // Delete all user tokens
-  await db.refreshToken.deleteMany({
-    where: { userId },
-  });
-}
-```
-
-### 4. Token Theft Detection
-
-Detect token reuse (possible theft):
-
-```typescript
-async function detectTokenReuse(tokenId: string): Promise<boolean> {
-  // If token doesn't exist but was valid JWT, it was likely reused
-  const token = await db.refreshToken.findUnique({
-    where: { id: tokenId },
-  });
-
-  return token === null;
-}
-
-// In refresh endpoint
-if (await detectTokenReuse(payload.tokenId)) {
-  // Revoke all tokens for this user
-  await revokeAllUserTokens(payload.sub);
-
-  // Log security event
-  await logSecurityEvent({
-    userId: payload.sub,
-    event: 'POSSIBLE_TOKEN_THEFT',
-    severity: 'HIGH',
-  });
-
-  throw new UnauthorizedException('Token reuse detected');
-}
-```
-
-## Frontend Integration
-
-### Axios Interceptor
-
-```typescript
-import axios, { AxiosError } from 'axios';
-
-const api = axios.create({
-  baseURL: '/api',
-});
-
-// Add token to requests
-api.interceptors.request.use((config) => {
-  const token = getAccessToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// Handle token expiration
-api.interceptors.response.use(
-  (response) => response,
-  async (error: AxiosError) => {
-    const originalRequest = error.config;
-
-    // If token expired, try to refresh
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        const { data } = await axios.post('/api/auth/refresh', null, {
-          withCredentials: true, // Send refresh token cookie
-        });
-
-        setAccessToken(data.accessToken);
-
-        // Retry original request
-        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-        return api(originalRequest);
-      } catch (refreshError) {
-        // Refresh failed, redirect to login
-        setAccessToken(null);
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
-      }
-    }
-
-    return Promise.reject(error);
-  }
-);
-```
-
-### React Hook
-
-```typescript
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-export function useTokenRefresh() {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // Refresh token before expiry (14 minutes)
-    const interval = setInterval(async () => {
-      try {
-        const { data } = await api.post('/api/auth/refresh');
-        setAccessToken(data.accessToken);
-      } catch (error) {
-        // Refresh failed
-        setAccessToken(null);
-        navigate('/login');
-      }
-    }, 14 * 60 * 1000); // 14 minutes
-
-    return () => clearInterval(interval);
-  }, [navigate]);
-}
-```
-
-## Testing
-
-### Unit Tests
-
-```typescript
-import { describe, it, expect, beforeEach } from 'vitest';
-
-describe('Token Generation', () => {
-  it('should generate valid access token', () => {
-    const user = { id: '123', email: 'test@test.com', role: 'user' };
-    const token = generateAccessToken(user);
-
-    const payload = jwt.verify(token, ACCESS_SECRET) as AccessTokenPayload;
-
-    expect(payload.sub).toBe('123');
-    expect(payload.email).toBe('test@test.com');
-    expect(payload.exp - payload.iat).toBe(15 * 60);
-  });
-
-  it('should generate unique refresh token IDs', () => {
-    const token1 = generateRefreshToken('user1');
-    const token2 = generateRefreshToken('user1');
-
-    expect(token1.tokenId).not.toBe(token2.tokenId);
-  });
-});
-
-describe('Token Refresh', () => {
-  it('should rotate refresh token', async () => {
-    const { token: oldToken, tokenId: oldId } = generateRefreshToken('user1');
-
-    await storeRefreshToken(oldId, 'user1', oldToken);
-
-    const res = { cookie: vi.fn() };
-    const { accessToken } = await refresh(oldToken, res);
-
-    expect(accessToken).toBeTruthy();
-
-    // Old token should be deleted
-    const oldStored = await db.refreshToken.findUnique({
-      where: { id: oldId },
-    });
-    expect(oldStored).toBeNull();
-  });
-});
-```
-
-## Performance Optimization
-
-### Token Caching
-
-```typescript
-import NodeCache from 'node-cache';
-
-const tokenCache = new NodeCache({
-  stdTTL: 900, // 15 minutes
-  checkperiod: 120,
-});
-
-export async function verifyAccessToken(
-  token: string
-): Promise<AccessTokenPayload | null> {
-  // Check cache first
-  const cached = tokenCache.get<AccessTokenPayload>(token);
-  if (cached) {
-    return cached;
-  }
-
-  try {
-    const payload = jwt.verify(token, ACCESS_SECRET) as AccessTokenPayload;
-
-    // Cache token
-    const ttl = payload.exp - Math.floor(Date.now() / 1000);
-    tokenCache.set(token, payload, ttl);
-
-    return payload;
-  } catch (error) {
-    return null;
-  }
-}
-```
-
-## Lessons Applied
-
-This two-token architecture is what I recommend for production systems:
-
-**Stateless with accountability**: Access tokens are stateless (no DB lookup), but refresh tokens are tracked (can revoke when needed).
-
-**Security by default**: Short-lived access tokens limit damage if stolen. HttpOnly cookies prevent XSS theft. Token rotation catches reuse.
-
-**Smooth user experience**: Users don't get logged out every 15 minutes. The frontend automatically refreshes tokens before they expire.
-
-At Andersen, I've applied these patterns to production APIs. The architecture works well for systems that need both scalability and security.
-
-## Key Takeaways
-
-- Short-lived access tokens (15 min)
-- HttpOnly refresh tokens (7 days)
-- Rotate on every use
-- Store tokens in database for revocation
-- Never use localStorage for tokens
-
----
-
-*Questions about JWT implementation? Need help with token rotation? Reach out or check the Aegis2FA source code!*
+The code is in [Aegis2FA](https://github.com/Ilia01/Aegis2FA). The auth module is probably the most polished part of the whole project.

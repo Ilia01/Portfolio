@@ -21,14 +21,14 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         {/* Header with Featured Badge */}
         <div className="space-y-2">
           {project.featured && (
-            <div className="inline-flex px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full text-xs text-green-400 font-mono mb-2">
-              ⭐ Featured
+            <div className="inline-flex px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full text-xs text-green-500 mb-2">
+              Featured
             </div>
           )}
           <h3 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white group-hover:text-green-400 transition-colors">
             {project.title}
           </h3>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 font-mono">{project.subtitle}</p>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">{project.subtitle}</p>
 
           {/* Highlights */}
           {project.highlights && project.highlights.length > 0 && (
@@ -36,7 +36,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
               {project.highlights.map((highlight, i) => (
                 <span
                   key={i}
-                  className="px-2 py-1 text-xs rounded-md bg-green-500/10 text-green-400 border border-green-500/20 font-mono"
+                  className="px-2 py-1 text-xs rounded-md bg-green-500/10 text-green-500 border border-green-500/20"
                 >
                   {highlight}
                 </span>
@@ -52,15 +52,15 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         {project.problem && (
           <div className="space-y-3 text-sm">
             <div>
-              <span className="text-red-400 font-mono text-xs font-semibold">Problem:</span>
+              <span className="text-red-400 text-xs font-semibold">Problem:</span>
               <p className="text-zinc-600 dark:text-zinc-400 mt-1.5 leading-relaxed">{project.problem}</p>
             </div>
             <div>
-              <span className="text-blue-400 font-mono text-xs font-semibold">Solution:</span>
+              <span className="text-blue-400 text-xs font-semibold">Solution:</span>
               <p className="text-zinc-600 dark:text-zinc-400 mt-1.5 leading-relaxed">{project.action}</p>
             </div>
             <div>
-              <span className="text-green-400 font-mono text-xs font-semibold flex items-center gap-1">
+              <span className="text-green-500 text-xs font-semibold flex items-center gap-1">
                 <TrendingUp className="w-3 h-3" />
                 Impact:
               </span>
@@ -77,13 +77,13 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
           {project.technologies.slice(0, 6).map((tech, i) => (
             <span
               key={i}
-              className="px-2.5 py-1.5 text-xs rounded-md bg-zinc-100/50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 font-mono border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+              className="px-2.5 py-1.5 text-xs rounded-md bg-zinc-100/50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
             >
               {tech}
             </span>
           ))}
           {project.technologies.length > 6 && (
-            <span className="px-2.5 py-1.5 text-xs rounded-md bg-zinc-100/50 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 font-mono border border-zinc-200 dark:border-zinc-800">
+            <span className="px-2.5 py-1.5 text-xs rounded-md bg-zinc-100/50 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">
               +{project.technologies.length - 6} more
             </span>
           )}
@@ -145,14 +145,11 @@ export function Projects() {
           viewport={{ once: true }}
           className="mb-12"
         >
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-green-400 font-mono text-xl">$</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white">
-              ls -l ./projects
-            </h2>
-          </div>
-          <p className="text-zinc-600 dark:text-zinc-400 font-mono text-sm sm:text-base">
-            Building production-ready systems and developer tools
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-3">
+            Projects
+          </h2>
+          <p className="text-zinc-600 dark:text-zinc-400 text-sm sm:text-base">
+            Production-ready systems and developer tools
           </p>
         </motion.div>
 
@@ -167,9 +164,9 @@ export function Projects() {
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-md text-sm font-mono transition-all ${
+              className={`px-4 py-2 rounded-md text-sm transition-all capitalize ${
                 selectedCategory === category
-                  ? "bg-green-500/20 text-green-400 border border-green-500/40"
+                  ? "bg-green-500/20 text-green-500 border border-green-500/40"
                   : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
               }`}
             >
@@ -181,7 +178,7 @@ export function Projects() {
         {/* Featured Projects */}
         {featuredProjects.length > 0 && (
           <div className="mb-16">
-            <h3 className="text-base sm:text-lg font-mono text-zinc-600 dark:text-zinc-400 mb-6">
+            <h3 className="text-base sm:text-lg font-medium text-zinc-600 dark:text-zinc-400 mb-6">
               Featured Projects
             </h3>
             <div className="grid lg:grid-cols-2 gap-6">
@@ -195,7 +192,7 @@ export function Projects() {
         {/* Other Projects */}
         {otherProjects.length > 0 && (
           <div>
-            <h3 className="text-base sm:text-lg font-mono text-zinc-600 dark:text-zinc-400 mb-6">
+            <h3 className="text-base sm:text-lg font-medium text-zinc-600 dark:text-zinc-400 mb-6">
               Other Projects
             </h3>
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">

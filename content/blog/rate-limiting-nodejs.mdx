@@ -1,579 +1,72 @@
 ---
-title: "Rate Limiting and CSRF Protection in Node.js"
-description: "Implementing rate limiting, CSRF protection, and security headers for Node.js APIs. Lessons from building Aegis2FA."
+title: "Rate Limiting That Actually Works"
+description: "I added rate limiting to Aegis2FA after realizing how easy brute force attacks are. Here's what I learned."
 date: 2025-01-06
 published: true
 tags: ["security", "nodejs", "backend", "rate-limiting"]
 ---
 
-## Why Rate Limiting Matters
+I added rate limiting to Aegis2FA after reading about how trivial brute force attacks are. Someone with a script can try thousands of passwords per minute if you don't stop them.
 
-When building Aegis2FA, I realized rate limiting wasn't optional. Without it:
-- Brute force attacks become trivial
-- Database gets hammered by malicious requests
-- Compute costs spiral
-- Denial-of-service becomes easy
+## The Basics
 
-Rate limiting protects both the system and legitimate users.
-
-## The Multi-Layer Approach
-
-I implemented three layers of rate limiting:
-
-### Layer 1: Global Rate Limit
-
-Protect against general abuse:
+For login endpoints, I use 5 attempts per 15 minutes per IP. After that, you're locked out temporarily.
 
 ```typescript
-import rateLimit from 'express-rate-limit';
-import RedisStore from 'rate-limit-redis';
-import Redis from 'ioredis';
-
-const redis = new Redis(process.env.REDIS_URL);
-
-const globalLimiter = rateLimit({
-  store: new RedisStore({
-    sendCommand: (...args: string[]) => redis.call(...args),
-  }),
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per window
-  message: {
-    error: 'Too many requests from this IP, please try again later.',
-  },
-  standardHeaders: true, // Return rate limit info in headers
-  legacyHeaders: false,
-});
-
-app.use(globalLimiter);
-```
-
-### Layer 2: Endpoint-Specific Limits
-
-Different endpoints need different limits:
-
-```typescript
-// Strict limit for authentication
 const authLimiter = rateLimit({
-  store: new RedisStore({
-    sendCommand: (...args: string[]) => redis.call(...args),
-  }),
   windowMs: 15 * 60 * 1000,
-  max: 5, // Only 5 attempts per 15 minutes
+  max: 5,
   skipSuccessfulRequests: true, // Don't count successful logins
-  message: {
-    error: 'Too many login attempts, please try again later.',
-    retryAfter: 900, // seconds
-  },
 });
 
 app.post('/api/auth/login', authLimiter, loginHandler);
-
-// More lenient for read-only endpoints
-const readLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 60, // 60 requests per minute
-});
-
-app.get('/api/users/me', readLimiter, getCurrentUser);
 ```
 
-### Layer 3: User-Specific Limits
+The `skipSuccessfulRequests` part is important. If someone logs in successfully, that shouldn't count against their limit. You only want to track failed attempts.
 
-Track limits per user account:
+## Use Redis, Not Memory
+
+The default rate limiter stores counts in memory. That breaks if you have multiple server instances or if your server restarts.
+
+I switched to Redis. Now rate limit data persists and works across instances.
 
 ```typescript
-import { Request } from 'express';
+import RedisStore from 'rate-limit-redis';
 
-interface AuthRequest extends Request {
-  user?: { id: string };
-}
-
-function createUserLimiter(
-  max: number,
-  windowMs: number
-) {
-  return rateLimit({
-    store: new RedisStore({
-      sendCommand: (...args: string[]) => redis.call(...args),
-    }),
-    windowMs,
-    max,
-    keyGenerator: (req: AuthRequest) => {
-      // Use user ID if authenticated, otherwise IP
-      return req.user?.id || req.ip;
-    },
-    handler: (req, res) => {
-      res.status(429).json({
-        error: 'Account rate limit exceeded',
-        message: 'You have made too many requests. Please wait before trying again.',
-      });
-    },
-  });
-}
-
-const user2FALimiter = createUserLimiter(
-  5,                  // 5 attempts
-  15 * 60 * 1000      // per 15 minutes
-);
-
-app.post(
-  '/api/auth/verify-2fa',
-  authenticate,
-  user2FALimiter,
-  verify2FAHandler
-);
-```
-
-## CSRF Protection
-
-### Understanding CSRF
-
-Cross-Site Request Forgery tricks a user's browser into making unwanted requests:
-
-```html
-<!-- Attacker's malicious site -->
-<form action="https://your-app.com/api/auth/change-password" method="POST">
-  <input type="hidden" name="password" value="hacked123" />
-</form>
-<script>
-  document.forms[0].submit();
-</script>
-```
-
-If the user is logged in, this would succeed!
-
-### Solution: CSRF Tokens
-
-```typescript
-import csrf from 'csurf';
-import cookieParser from 'cookie-parser';
-
-app.use(cookieParser());
-
-const csrfProtection = csrf({
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-  },
-});
-
-// Generate CSRF token
-app.get('/api/csrf-token', csrfProtection, (req, res) => {
-  res.json({ csrfToken: req.csrfToken() });
-});
-
-// Protect state-changing endpoints
-app.post('/api/auth/change-password', csrfProtection, changePasswordHandler);
-app.delete('/api/users/me', csrfProtection, deleteAccountHandler);
-```
-
-### Frontend Integration
-
-```typescript
-// Fetch CSRF token on app load
-async function getCsrfToken(): Promise<string> {
-  const { data } = await axios.get('/api/csrf-token');
-  return data.csrfToken;
-}
-
-// Include in requests
-const csrfToken = await getCsrfToken();
-
-await axios.post(
-  '/api/auth/change-password',
-  { newPassword: 'secure123' },
-  {
-    headers: {
-      'X-CSRF-Token': csrfToken,
-    },
-  }
-);
-```
-
-## Security Headers
-
-### Helmet.js Configuration
-
-```typescript
-import helmet from 'helmet';
-
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'https:'],
-        connectSrc: ["'self'"],
-        fontSrc: ["'self'"],
-        objectSrc: ["'none'"],
-        mediaSrc: ["'self'"],
-        frameSrc: ["'none'"],
-      },
-    },
-    crossOriginEmbedderPolicy: true,
-    crossOriginOpenerPolicy: true,
-    crossOriginResourcePolicy: { policy: 'cross-origin' },
-    dnsPrefetchControl: true,
-    frameguard: { action: 'deny' },
-    hidePoweredBy: true,
-    hsts: {
-      maxAge: 31536000, // 1 year
-      includeSubDomains: true,
-      preload: true,
-    },
-    ieNoOpen: true,
-    noSniff: true,
-    originAgentCluster: true,
-    permittedCrossDomainPolicies: false,
-    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-    xssFilter: true,
-  })
-);
-```
-
-## Advanced Rate Limiting Patterns
-
-### Sliding Window with Redis
-
-More accurate than fixed windows:
-
-```typescript
-import Redis from 'ioredis';
-
-export class SlidingWindowRateLimiter {
-  constructor(
-    private redis: Redis,
-    private windowMs: number,
-    private maxRequests: number
-  ) {}
-
-  async isAllowed(key: string): Promise<{
-    allowed: boolean;
-    remaining: number;
-    resetAt: number;
-  }> {
-    const now = Date.now();
-    const windowStart = now - this.windowMs;
-
-    const pipeline = this.redis.pipeline();
-
-    // Remove old entries
-    pipeline.zremrangebyscore(key, 0, windowStart);
-
-    // Count requests in window
-    pipeline.zcard(key);
-
-    // Add current request
-    pipeline.zadd(key, now, `${now}-${Math.random()}`);
-
-    // Set expiry
-    pipeline.expire(key, Math.ceil(this.windowMs / 1000));
-
-    const results = await pipeline.exec();
-
-    if (!results) {
-      throw new Error('Redis pipeline failed');
-    }
-
-    const count = results[1][1] as number;
-
-    const allowed = count < this.maxRequests;
-    const remaining = Math.max(0, this.maxRequests - count - 1);
-    const resetAt = now + this.windowMs;
-
-    return { allowed, remaining, resetAt };
-  }
-}
-
-// Usage
-const limiter = new SlidingWindowRateLimiter(
-  redis,
-  15 * 60 * 1000, // 15 minutes
-  5               // 5 requests
-);
-
-app.post('/api/auth/login', async (req, res, next) => {
-  const result = await limiter.isAllowed(`login:${req.ip}`);
-
-  if (!result.allowed) {
-    return res.status(429).json({
-      error: 'Too many requests',
-      retryAfter: Math.ceil((result.resetAt - Date.now()) / 1000),
-    });
-  }
-
-  res.set({
-    'X-RateLimit-Remaining': result.remaining.toString(),
-    'X-RateLimit-Reset': new Date(result.resetAt).toISOString(),
-  });
-
-  next();
+const limiter = rateLimit({
+  store: new RedisStore({
+    sendCommand: (...args) => redis.call(...args),
+  }),
+  windowMs: 15 * 60 * 1000,
+  max: 5,
 });
 ```
 
-### Adaptive Rate Limiting
+## Different Limits for Different Endpoints
 
-Adjust limits based on behavior:
+Not everything needs the same limits.
 
-```typescript
-interface UserRiskScore {
-  score: number; // 0-100
-  factors: {
-    failedLogins: number;
-    suspiciousIPs: boolean;
-    recentBlocks: number;
-  };
-}
+- Login: 5 attempts / 15 min (strict, security-critical)
+- 2FA verification: 5 attempts / 15 min (same reason)
+- Password reset: 3 attempts / hour (prevent email spam)
+- Read-only endpoints: 60 requests / minute (more lenient)
 
-async function calculateRiskScore(userId: string): Promise<UserRiskScore> {
-  const [failedLogins, suspiciousIPs, recentBlocks] = await Promise.all([
-    redis.get(`failed-logins:${userId}`),
-    redis.sismember('suspicious-ips', userId),
-    redis.get(`blocks:${userId}`),
-  ]);
+The pattern I follow: anything that could be abused for brute force or spam gets strict limits. Read operations get normal limits.
 
-  const score =
-    parseInt(failedLogins || '0') * 10 +
-    (suspiciousIPs ? 30 : 0) +
-    parseInt(recentBlocks || '0') * 15;
+## What I'd Add in Production
 
-  return {
-    score: Math.min(100, score),
-    factors: {
-      failedLogins: parseInt(failedLogins || '0'),
-      suspiciousIPs: Boolean(suspiciousIPs),
-      recentBlocks: parseInt(recentBlocks || '0'),
-    },
-  };
-}
+**User-based rate limiting.** IP-based is fine for learning, but multiple users behind the same NAT share an IP. In production, I'd track by user ID for authenticated endpoints.
 
-function createAdaptiveLimiter() {
-  return async (req: AuthRequest, res: Response, next: NextFunction) => {
-    if (!req.user) return next();
+**Adaptive limits.** If someone hits rate limits repeatedly, their limits should get stricter. If an IP gets blocked 10 times in a day, maybe blacklist it.
 
-    const risk = await calculateRiskScore(req.user.id);
+**Monitoring.** I should have added logging from the start. Knowing how often rate limits are hit tells you if your limits are too strict or if you're under attack.
 
-    // Adjust limits based on risk
-    let maxRequests: number;
-    if (risk.score > 70) {
-      maxRequests = 3; // High risk: strict limit
-    } else if (risk.score > 40) {
-      maxRequests = 5; // Medium risk: normal limit
-    } else {
-      maxRequests = 10; // Low risk: relaxed limit
-    }
+## The CSRF Part
 
-    const limiter = new SlidingWindowRateLimiter(
-      redis,
-      15 * 60 * 1000,
-      maxRequests
-    );
+I also added CSRF protection while I was thinking about security. For any state-changing endpoint (POST, PUT, DELETE), the frontend needs to include a CSRF token.
 
-    const result = await limiter.isAllowed(`adaptive:${req.user.id}`);
+This prevents attacks where a malicious site tricks your browser into making requests to my API.
 
-    if (!result.allowed) {
-      return res.status(429).json({
-        error: 'Rate limit exceeded',
-        riskScore: risk.score,
-      });
-    }
+I used the `csurf` middleware. It's a few lines of setup, but it's one of those things that's easy to forget until it's too late.
 
-    next();
-  };
-}
-```
-
-## Monitoring and Alerts
-
-### Track Rate Limit Violations
-
-```typescript
-import { EventEmitter } from 'events';
-
-const securityEvents = new EventEmitter();
-
-function createMonitoredLimiter(name: string, limiter: RateLimitRequestHandler) {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    const originalStatus = res.status.bind(res);
-
-    res.status = function (code: number) {
-      if (code === 429) {
-        // Rate limit hit
-        securityEvents.emit('rate-limit-exceeded', {
-          limiter: name,
-          ip: req.ip,
-          user: (req as AuthRequest).user?.id,
-          endpoint: req.path,
-          timestamp: new Date(),
-        });
-      }
-      return originalStatus(code);
-    };
-
-    return limiter(req, res, next);
-  };
-}
-
-// Set up monitoring
-securityEvents.on('rate-limit-exceeded', async (event) => {
-  console.warn('Rate limit exceeded:', event);
-
-  // Track in Redis
-  await redis.hincrby('rate-limit-violations', event.ip, 1);
-
-  // If too many violations, blacklist IP
-  const violations = await redis.hget('rate-limit-violations', event.ip);
-  if (parseInt(violations || '0') > 100) {
-    await redis.sadd('blacklisted-ips', event.ip);
-    console.error('Blacklisted IP:', event.ip);
-  }
-});
-```
-
-### Metrics Dashboard
-
-```typescript
-import { Counter, Histogram } from 'prom-client';
-
-const rateLimitHits = new Counter({
-  name: 'rate_limit_hits_total',
-  help: 'Total number of rate limit hits',
-  labelNames: ['limiter', 'endpoint'],
-});
-
-const requestDuration = new Histogram({
-  name: 'request_duration_seconds',
-  help: 'Request duration in seconds',
-  labelNames: ['method', 'route', 'status'],
-  buckets: [0.1, 0.5, 1, 2, 5],
-});
-
-// Track metrics
-app.use((req, res, next) => {
-  const start = Date.now();
-
-  res.on('finish', () => {
-    const duration = (Date.now() - start) / 1000;
-
-    requestDuration.observe(
-      {
-        method: req.method,
-        route: req.route?.path || req.path,
-        status: res.statusCode,
-      },
-      duration
-    );
-
-    if (res.statusCode === 429) {
-      rateLimitHits.inc({
-        limiter: 'unknown',
-        endpoint: req.path,
-      });
-    }
-  });
-
-  next();
-});
-
-// Expose metrics
-app.get('/metrics', (req, res) => {
-  res.set('Content-Type', register.contentType);
-  res.end(register.metrics());
-});
-```
-
-## Testing Rate Limits
-
-```typescript
-import { describe, it, expect, beforeEach } from 'vitest';
-import request from 'supertest';
-
-describe('Rate Limiting', () => {
-  beforeEach(async () => {
-    await redis.flushdb();
-  });
-
-  it('should allow requests within limit', async () => {
-    for (let i = 0; i < 5; i++) {
-      const res = await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'test@test.com', password: 'password' });
-
-      expect(res.status).not.toBe(429);
-    }
-  });
-
-  it('should block requests exceeding limit', async () => {
-    // Make 5 requests (limit)
-    for (let i = 0; i < 5; i++) {
-      await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'test@test.com', password: 'wrong' });
-    }
-
-    // 6th request should be blocked
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({ email: 'test@test.com', password: 'wrong' });
-
-    expect(res.status).toBe(429);
-    expect(res.body.error).toContain('Too many');
-  });
-
-  it('should reset after window expires', async () => {
-    // Hit limit
-    for (let i = 0; i < 5; i++) {
-      await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'test@test.com', password: 'wrong' });
-    }
-
-    // Wait for window to expire
-    await new Promise((resolve) => setTimeout(resolve, 16 * 60 * 1000));
-
-    // Should work again
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({ email: 'test@test.com', password: 'password' });
-
-    expect(res.status).not.toBe(429);
-  });
-});
-```
-
-## Production Results
-
-After implementing these security measures in Aegis2FA:
-
-- **Blocked 10,000+ brute force attempts** in first month
-- **Zero successful CSRF attacks**
-- **99.99% legitimate request success rate**
-- **Sub-5ms rate limit checking** with Redis
-- **Reduced malicious traffic by 95%**
-
-## Checklist for Production
-
-- [ ] Global rate limit (100 req/15min)
-- [ ] Auth endpoint rate limit (5 req/15min)
-- [ ] CSRF protection on state-changing endpoints
-- [ ] Security headers with Helmet.js
-- [ ] Redis for distributed rate limiting
-- [ ] Monitoring and alerts
-- [ ] IP blacklisting for repeat offenders
-- [ ] User-specific rate limits
-- [ ] Adaptive limits based on risk
-- [ ] Rate limit info in response headers
-- [ ] Comprehensive tests
-
-## Conclusion
-
-Rate limiting and CSRF protection are not optional. They're the difference between a secure production app and a vulnerable target.
-
-Start with simple IP-based limits, then add user-specific and adaptive limits as you scale.
-
----
-
-*Questions about rate limiting strategies? Need help with Redis configuration? Open an issue on GitHub!*
+Most of my security code in Aegis2FA is boring. That's probably a good sign.

@@ -1,354 +1,60 @@
 ---
-title: "Argon2 vs bcrypt: Why I Chose Argon2id for Aegis2FA"
-description: "Deep dive into password hashing algorithms, comparing bcrypt, scrypt, and Argon2. Learn why Argon2id won the Password Hashing Competition and how to implement it correctly."
+title: "Why I Switched from bcrypt to Argon2"
+description: "When building Aegis2FA, I had to choose a password hashing algorithm. Here's why I went with Argon2id."
 date: 2025-01-08
 published: true
 tags: ["security", "cryptography", "password-hashing", "backend"]
 ---
 
-## The Password Hashing Problem
+When I started building Aegis2FA, I needed to pick a password hashing algorithm. Most tutorials just say "use bcrypt" and move on. I wanted to understand why.
 
-When I started building Aegis2FA, I needed to choose a password hashing algorithm. The stakes are high: weak password hashing is the difference between a minor breach and a catastrophic data leak.
+## The Short Answer
 
-## The Contenders
+Use Argon2id. It won the Password Hashing Competition in 2015 and it's designed to be hard to crack even with expensive hardware.
 
-### bcrypt (1999)
+## Why Not bcrypt?
 
-The old reliable. Based on the Blowfish cipher.
+bcrypt has been around since 1999 and it works. But it has limitations:
 
-**Pros:**
-- Battle-tested for 25+ years
-- Widely supported across languages
-- Adaptive cost factor
+- Max 72 characters (anything longer gets silently truncated)
+- Fixed memory usage (can't tune it)
+- GPUs can crack it faster than Argon2
 
-**Cons:**
-- Limited to 72 characters
-- Memory usage is fixed (not configurable)
-- Vulnerable to GPU acceleration
-- No built-in resistance to side-channel attacks
+The GPU thing matters. An attacker with a farm of graphics cards can run thousands of bcrypt hashes in parallel. Argon2 uses a lot of memory per hash, which limits parallelism.
 
-### scrypt (2009)
-
-Designed to be memory-hard.
-
-**Pros:**
-- Configurable memory requirements
-- Resistant to GPU/ASIC attacks
-- Good for preventing hardware attacks
-
-**Cons:**
-- Complex parameter tuning
-- Less widely adopted
-- Can be difficult to implement correctly
-
-### Argon2 (2015)
-
-Winner of the Password Hashing Competition.
-
-**Pros:**
-- Memory-hard with configurable parameters
-- Side-channel resistance
-- Three variants (Argon2d, Argon2i, Argon2id)
-- Active development and security review
-
-**Cons:**
-- Newer (less battle-tested)
-- Not available in all standard libraries
-
-## Why Argon2id Won
-
-I chose **Argon2id** for Aegis2FA. Here's why:
-
-### 1. Memory-Hardness
-
-Argon2 fills a large memory buffer with pseudorandom data. This makes GPU/ASIC attacks exponentially more expensive:
+## What I Used
 
 ```typescript
 import argon2 from 'argon2';
 
-// Hash with 64 MB memory cost
 const hash = await argon2.hash(password, {
   type: argon2.argon2id,
-  memoryCost: 65536, // 64 MB in KiB
-  timeCost: 3,        // 3 iterations
-  parallelism: 4,     // 4 threads
-});
-```
-
-**Why this matters**: An attacker with a GPU farm still needs to allocate 64 MB per hash attempt. With bcrypt, they can run thousands in parallel with minimal memory.
-
-### 2. Configurable Parameters
-
-Argon2 has three tuning knobs:
-
-```typescript
-interface Argon2Options {
-  memoryCost: number;    // Memory in KiB
-  timeCost: number;      // Number of iterations
-  parallelism: number;   // Number of threads
-}
-```
-
-This lets you balance security vs. performance based on your infrastructure.
-
-### 3. Side-Channel Resistance
-
-Argon2id combines Argon2i (data-independent) and Argon2d (data-dependent):
-
-- **First pass**: Data-independent (resistant to timing attacks)
-- **Subsequent passes**: Data-dependent (resistant to time-memory tradeoffs)
-
-bcrypt and scrypt don't provide this level of protection.
-
-## Implementation in Aegis2FA
-
-### Password Hashing
-
-```typescript
-import argon2 from 'argon2';
-
-export async function hashPassword(password: string): Promise<string> {
-  // Validate password first
-  if (password.length < 8 || password.length > 128) {
-    throw new Error('Password must be between 8 and 128 characters');
-  }
-
-  return argon2.hash(password, {
-    type: argon2.argon2id,
-    memoryCost: 65536,  // 64 MB
-    timeCost: 3,        // 3 iterations
-    parallelism: 4,     // 4 threads
-    hashLength: 32,     // 32 bytes output
-  });
-}
-```
-
-### Password Verification
-
-```typescript
-export async function verifyPassword(
-  hash: string,
-  password: string
-): Promise<boolean> {
-  try {
-    return await argon2.verify(hash, password);
-  } catch (error) {
-    // argon2.verify throws on invalid hash format
-    return false;
-  }
-}
-```
-
-### Handling Algorithm Upgrades
-
-Store the algorithm version in the hash:
-
-```typescript
-interface PasswordHash {
-  algorithm: 'argon2id' | 'bcrypt';
-  hash: string;
-  version: number;
-}
-
-export async function verifyAndUpgrade(
-  storedHash: PasswordHash,
-  password: string
-): Promise<{ valid: boolean; needsUpgrade: boolean }> {
-  let valid = false;
-
-  // Verify with old algorithm
-  if (storedHash.algorithm === 'bcrypt') {
-    valid = await bcrypt.compare(password, storedHash.hash);
-  } else {
-    valid = await argon2.verify(storedHash.hash, password);
-  }
-
-  // Check if we need to upgrade
-  const needsUpgrade =
-    storedHash.algorithm !== 'argon2id' ||
-    storedHash.version < CURRENT_VERSION;
-
-  return { valid, needsUpgrade };
-}
-```
-
-## Performance Benchmarks
-
-I ran benchmarks on a 4-core, 8GB RAM server:
-
-```
-Algorithm     | Time   | Memory  | Operations/sec
---------------|--------|---------|---------------
-bcrypt (10)   | 65ms   | <1 MB   | 15.4
-scrypt (2^14) | 85ms   | 16 MB   | 11.8
-argon2id      | 95ms   | 64 MB   | 10.5
-```
-
-**Analysis**: Argon2id is slightly slower, but the memory usage makes it much more resistant to attacks.
-
-### Cost of Attacks
-
-Assuming an attacker has:
-- 1000 GPUs with 12 GB RAM each
-- bcrypt: Can run ~12,000 hashes in parallel per GPU
-- argon2id: Can run ~187 hashes in parallel per GPU (12GB / 64MB)
-
-**64x less parallelism** for the same hardware cost.
-
-## Parameter Selection
-
-### Conservative (High Security)
-
-```typescript
-{
-  memoryCost: 262144,  // 256 MB
-  timeCost: 4,
-  parallelism: 4,
-}
-// ~350ms hash time
-```
-
-Use for: Admin accounts, financial apps
-
-### Balanced (Recommended)
-
-```typescript
-{
-  memoryCost: 65536,   // 64 MB
-  timeCost: 3,
-  parallelism: 4,
-}
-// ~95ms hash time
-```
-
-Use for: Most production apps
-
-### Fast (Low Latency)
-
-```typescript
-{
-  memoryCost: 32768,   // 32 MB
-  timeCost: 2,
-  parallelism: 2,
-}
-// ~45ms hash time
-```
-
-Use for: High-volume, latency-sensitive APIs
-
-## Common Mistakes
-
-### 1. Using Default Parameters
-
-Don't use library defaults blindly:
-
-```typescript
-// BAD: Using defaults
-const hash = await argon2.hash(password);
-
-// GOOD: Explicit parameters
-const hash = await argon2.hash(password, {
-  type: argon2.argon2id,
-  memoryCost: 65536,
+  memoryCost: 65536, // 64 MB
   timeCost: 3,
   parallelism: 4,
 });
 ```
 
-### 2. Not Handling Memory Limits
+64 MB per hash sounds like a lot, but on a server it's fine. The point is that an attacker needs 64 MB *per attempt*, which adds up fast when you're trying millions of passwords.
 
-In containerized environments, set memory limits:
+## One Gotcha
 
-```dockerfile
-# Dockerfile
-ENV NODE_OPTIONS="--max-old-space-size=512"
+Don't use the library defaults without thinking. The defaults might be too weak (low memory) or too strong (slow login). Test with your actual hardware and pick values that give you ~100ms hash time.
 
-# docker-compose.yml
-services:
-  api:
-    mem_limit: 1g
-    mem_reservation: 512m
-```
+Also: don't hash synchronously in Node.js. It blocks the event loop. Always use async.
 
-### 3. Synchronous Hashing
+## Migration
 
-Never use synchronous hashing in Node.js:
+If you have existing bcrypt hashes, you can migrate users gradually. Check the algorithm when they log in, and if it's bcrypt, rehash with Argon2:
 
 ```typescript
-// BAD: Blocks event loop
-const hash = argon2.hashSync(password);
-
-// GOOD: Async
-const hash = await argon2.hash(password);
-```
-
-## Security Audit Checklist
-
-When implementing Argon2:
-
-- [ ] Use argon2id variant (not argon2i or argon2d)
-- [ ] Set memoryCost ≥ 65536 (64 MB)
-- [ ] Set timeCost ≥ 3
-- [ ] Set parallelism based on CPU cores (2-4)
-- [ ] Hash asynchronously
-- [ ] Rate limit password verification endpoints
-- [ ] Log failed login attempts
-- [ ] Implement account lockout after N failures
-- [ ] Use constant-time comparison for hashes
-- [ ] Store hash + parameters together
-- [ ] Plan for algorithm upgrades
-
-## Migration from bcrypt
-
-If you're migrating an existing app:
-
-```typescript
-async function migratePassword(
-  userId: string,
-  password: string,
-  oldHash: string
-): Promise<void> {
-  // Verify old hash
-  const valid = await bcrypt.compare(password, oldHash);
-  if (!valid) {
-    throw new Error('Invalid password');
+if (storedHash.algorithm === 'bcrypt') {
+  const valid = await bcrypt.compare(password, storedHash.hash);
+  if (valid) {
+    const newHash = await argon2.hash(password);
+    await updateUserHash(userId, newHash, 'argon2id');
   }
-
-  // Generate new hash
-  const newHash = await argon2.hash(password);
-
-  // Update database
-  await db.users.update({
-    where: { id: userId },
-    data: {
-      passwordHash: newHash,
-      hashAlgorithm: 'argon2id',
-      hashVersion: 1,
-    },
-  });
 }
 ```
 
-Migrate users opportunistically on login.
-
-## Results in Aegis2FA
-
-After 6 months in production:
-- **Zero password breaches**
-- **95ms p95 login latency**
-- **No memory issues** with 64 MB cost
-- **Successfully migrated** 100+ test users from bcrypt
-
-## Conclusion
-
-Argon2id is the right choice for new projects in 2025. It provides:
-- Maximum resistance to GPU/ASIC attacks
-- Side-channel attack protection
-- Flexible parameter tuning
-- Future-proof design
-
-The slightly higher CPU/memory cost is worth the security improvement.
-
----
-
-*Considering Argon2 for your project? Have questions about parameter tuning? Reach out or open an issue!*
+That's it. Argon2id for new projects, gradual migration for existing ones.
