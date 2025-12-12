@@ -23,14 +23,19 @@ const HEXAGON_CONFIGS: HexagonConfig[] = [
 ];
 
 function HexagonShape({ size }: { size: number }) {
+  // Proper hexagon aspect ratio (pointy-top)
+  const height = size;
+  const width = size * 0.866; // cos(30°) ratio for regular hexagon
+
   return (
     <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 100"
+      width={width}
+      height={height}
+      viewBox="0 0 86.6 100"
       fill="currentColor"
+      style={{ overflow: "visible" }}
     >
-      <polygon points="50,2 95,25 95,75 50,98 5,75 5,25" />
+      <polygon points="43.3,0 86.6,25 86.6,75 43.3,100 0,75 0,25" />
     </svg>
   );
 }
@@ -55,7 +60,7 @@ export function FloatingHexagons() {
   }
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ willChange: "transform" }}>
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {HEXAGON_CONFIGS.map((hex, index) => (
         <motion.div
           key={index}
@@ -65,6 +70,7 @@ export function FloatingHexagons() {
             top: `${hex.y}%`,
             filter: `blur(${hex.blur}px)`,
             opacity: hex.opacity,
+            willChange: "transform",
           }}
           animate={{
             x: [0, 30, -20, 0],
