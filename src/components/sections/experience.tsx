@@ -5,7 +5,7 @@ import { profileData } from "@/lib/data";
 
 export function Experience() {
   return (
-    <section id="experience" className="py-16 sm:py-20 px-4">
+    <section id="experience" className="py-16 sm:py-20 px-4 relative z-0">
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
