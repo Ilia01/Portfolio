@@ -97,9 +97,8 @@ export function Hero() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed"
           >
-            Finishing my degree while working on a Node.js team.
-            Currently handling most of Tech Lead&apos;s responsibilities in his absence.
-            I build auth systems and security-focused APIs in my own time to learn the fundamentals properly.
+            Finishing my degree while gaining hands-on experience in a Node.js team.
+            Building auth systems and security-focused APIs to understand the fundamentals deeply.
           </motion.p>
 
           {/* CTA Buttons */}

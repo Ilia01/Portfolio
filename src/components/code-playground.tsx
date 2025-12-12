@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Editor from "@monaco-editor/react";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Play,
@@ -17,6 +17,19 @@ import {
 import { useTheme } from "next-themes";
 import { codeExamples, categories, type CodeExample } from "@/lib/code-examples";
 import { executeCode, formatExecutionTime, type ConsoleMessage } from "@/lib/code-executor";
+
+// Lazy load Monaco Editor to reduce initial bundle size (~2-3MB)
+const Editor = dynamic(() => import("@monaco-editor/react"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-[600px] bg-zinc-50 dark:bg-zinc-900 rounded-lg border-2 border-zinc-200 dark:border-zinc-800">
+      <div className="text-center">
+        <Loader2 className="w-8 h-8 animate-spin text-green-400 mx-auto mb-2" />
+        <p className="text-sm text-zinc-500 font-mono">Loading editor...</p>
+      </div>
+    </div>
+  ),
+});
 
 export function CodePlayground() {
   const { theme } = useTheme();
@@ -266,11 +279,6 @@ export function CodePlayground() {
                 lineDecorationsWidth: 10,
                 lineNumbersMinChars: 3,
               }}
-              loading={
-                <div className="flex items-center justify-center h-[600px] bg-zinc-50 dark:bg-zinc-900">
-                  <Loader2 className="w-8 h-8 animate-spin text-green-400" />
-                </div>
-              }
             />
           </div>
         </div>

@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-interface Hexagon {
-  id: number;
+interface HexagonConfig {
   x: number;
   y: number;
   size: number;
@@ -14,16 +13,13 @@ interface Hexagon {
   delay: number;
 }
 
-// Fixed positions for consistent layout
-const HEXAGON_CONFIGS: Omit<Hexagon, "id">[] = [
-  { x: 10, y: 15, size: 120, opacity: 0.15, blur: 30, duration: 25, delay: 0 },
-  { x: 85, y: 10, size: 100, opacity: 0.12, blur: 25, duration: 30, delay: 2 },
-  { x: 75, y: 60, size: 80, opacity: 0.18, blur: 20, duration: 22, delay: 1 },
-  { x: 20, y: 70, size: 90, opacity: 0.14, blur: 28, duration: 28, delay: 3 },
-  { x: 50, y: 20, size: 70, opacity: 0.1, blur: 35, duration: 35, delay: 0.5 },
-  { x: 90, y: 80, size: 110, opacity: 0.16, blur: 22, duration: 26, delay: 1.5 },
-  { x: 5, y: 45, size: 85, opacity: 0.13, blur: 32, duration: 32, delay: 2.5 },
-  { x: 60, y: 85, size: 95, opacity: 0.11, blur: 28, duration: 24, delay: 4 },
+// Reduced to 5 hexagons for better performance
+const HEXAGON_CONFIGS: HexagonConfig[] = [
+  { x: 10, y: 15, size: 120, opacity: 0.12, blur: 30, duration: 25, delay: 0 },
+  { x: 85, y: 10, size: 100, opacity: 0.10, blur: 25, duration: 30, delay: 2 },
+  { x: 75, y: 60, size: 80, opacity: 0.14, blur: 20, duration: 22, delay: 1 },
+  { x: 20, y: 70, size: 90, opacity: 0.11, blur: 28, duration: 28, delay: 3 },
+  { x: 50, y: 40, size: 70, opacity: 0.08, blur: 35, duration: 35, delay: 0.5 },
 ];
 
 function HexagonShape({ size }: { size: number }) {
@@ -59,7 +55,7 @@ export function FloatingHexagons() {
   }
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ willChange: "transform" }}>
       {HEXAGON_CONFIGS.map((hex, index) => (
         <motion.div
           key={index}
@@ -71,10 +67,8 @@ export function FloatingHexagons() {
             opacity: hex.opacity,
           }}
           animate={{
-            x: [0, 40, -30, 20, 0],
-            y: [0, -30, 40, -20, 0],
-            scale: [1, 1.1, 0.95, 1.05, 1],
-            rotate: [0, 15, -10, 20, 0],
+            x: [0, 30, -20, 0],
+            y: [0, -20, 30, 0],
           }}
           transition={{
             duration: hex.duration,

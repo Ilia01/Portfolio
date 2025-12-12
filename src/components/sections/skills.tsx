@@ -3,20 +3,20 @@
 import { motion } from "framer-motion";
 import { profileData } from "@/lib/data";
 
-type SkillLevel = "expert" | "proficient" | "familiar";
+type SkillLevel = "daily" | "regular" | "learning";
 
 const levelColors: Record<SkillLevel, { bg: string; text: string; border: string }> = {
-  expert: {
+  daily: {
     bg: "bg-green-500/10",
     text: "text-green-500",
     border: "border-green-500/20",
   },
-  proficient: {
+  regular: {
     bg: "bg-blue-500/10",
     text: "text-blue-500",
     border: "border-blue-500/20",
   },
-  familiar: {
+  learning: {
     bg: "bg-zinc-500/10",
     text: "text-zinc-500",
     border: "border-zinc-500/20",
@@ -24,9 +24,9 @@ const levelColors: Record<SkillLevel, { bg: string; text: string; border: string
 };
 
 const levelLabels: Record<SkillLevel, string> = {
-  expert: "Expert",
-  proficient: "Proficient",
-  familiar: "Familiar",
+  daily: "Daily",
+  regular: "Regular",
+  learning: "Learning",
 };
 
 function SkillPill({ name, level }: { name: string; level: SkillLevel }) {
@@ -109,7 +109,7 @@ export function Skills() {
 
           {/* Legend */}
           <div className="flex flex-wrap gap-4 mt-4">
-            {(["expert", "proficient", "familiar"] as const).map((level) => (
+            {(["daily", "regular", "learning"] as const).map((level) => (
               <div key={level} className="flex items-center gap-2 text-xs text-zinc-500">
                 <span
                   className={`w-2 h-2 rounded-full ${levelColors[level].bg} ${levelColors[level].border} border`}

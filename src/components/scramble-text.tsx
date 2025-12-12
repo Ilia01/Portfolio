@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface ScrambleTextProps {
   phrases: string[];
@@ -20,18 +20,24 @@ export function ScrambleText({
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [displayText, setDisplayText] = useState(phrases[0]);
   const [isScrambling, setIsScrambling] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const getRandomChar = useCallback(() => {
     return CHARS[Math.floor(Math.random() * CHARS.length)];
   }, []);
 
   const scrambleToPhrase = useCallback(
-    (targetPhrase: string) => {
+    (targetPhrase: string, currentLength: number) => {
+      // Clear any existing interval
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+
       setIsScrambling(true);
       let progress = 0;
-      const maxLength = Math.max(displayText.length, targetPhrase.length);
+      const maxLength = Math.max(currentLength, targetPhrase.length);
 
-      const scrambleInterval = setInterval(() => {
+      intervalRef.current = setInterval(() => {
         const result = targetPhrase
           .padEnd(maxLength, " ")
           .split("")
@@ -46,23 +52,33 @@ export function ScrambleText({
         setDisplayText(result);
 
         if (progress >= targetPhrase.length) {
-          clearInterval(scrambleInterval);
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
           setDisplayText(targetPhrase);
           setIsScrambling(false);
         }
 
         progress++;
       }, scrambleSpeed);
-
-      return () => clearInterval(scrambleInterval);
     },
-    [displayText.length, scrambleSpeed, getRandomChar]
+    [scrambleSpeed, getRandomChar]
   );
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     // Initial scramble effect on mount
     const initialTimeout = setTimeout(() => {
-      scrambleToPhrase(phrases[0]);
+      scrambleToPhrase(phrases[0], phrases[0].length);
     }, 500);
 
     return () => clearTimeout(initialTimeout);
@@ -75,11 +91,11 @@ export function ScrambleText({
     const cycleTimeout = setTimeout(() => {
       const nextIndex = (currentPhraseIndex + 1) % phrases.length;
       setCurrentPhraseIndex(nextIndex);
-      scrambleToPhrase(phrases[nextIndex]);
+      scrambleToPhrase(phrases[nextIndex], displayText.length);
     }, pauseDuration);
 
     return () => clearTimeout(cycleTimeout);
-  }, [currentPhraseIndex, phrases, pauseDuration, isScrambling, scrambleToPhrase]);
+  }, [currentPhraseIndex, phrases, pauseDuration, isScrambling, scrambleToPhrase, displayText.length]);
 
   // Check for reduced motion preference
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);

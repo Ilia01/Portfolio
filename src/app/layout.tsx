@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ConsoleEggs } from "@/components/console-eggs";
 import { StructuredData } from "@/components/structured-data";
 import { CustomCursor } from "@/components/custom-cursor";
 
@@ -18,15 +17,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Ilia Goginashvili | Backend Developer & Node.js Team Lead",
+    default: "Ilia Goginashvili | Backend Developer",
     template: "%s | Ilia Goginashvili",
   },
   description:
-    "Backend engineer specializing in Node.js, TypeScript, and clean architecture. Currently leading Node.js team at Andersen. Built Aegis2FA, ApiFlow, and production-ready authentication systems. Available for full-time roles and consulting.",
+    "Backend-focused Software Engineer Trainee with hands-on experience in TypeScript, Node.js, and secure API development. Building production systems with clean architecture at Andersen. Open to opportunities.",
   keywords: [
     "Backend Developer",
-    "Node.js Team Lead",
-    "TypeScript Expert",
+    "Software Engineer Trainee",
+    "TypeScript",
     "NestJS Developer",
     "Express.js",
     "PostgreSQL",
@@ -50,25 +49,25 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://ilia-goginashvili.dev", // Update with your actual domain
-    title: "Ilia Goginashvili | Backend Developer & Node.js Team Lead",
+    title: "Ilia Goginashvili | Backend Developer",
     description:
-      "Backend engineer with team leadership experience. Built Aegis2FA, ApiFlow, and production systems at Andersen. Specializing in Node.js, TypeScript, and authentication architecture.",
+      "Backend-focused Software Engineer Trainee building secure APIs and production systems with Node.js, TypeScript, and clean architecture at Andersen.",
     siteName: "Ilia Goginashvili Portfolio",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Ilia Goginashvili - Backend Developer & Node.js Team Lead",
+        alt: "Ilia Goginashvili - Backend Developer",
         type: "image/png",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ilia Goginashvili | Backend Developer & Node.js Team Lead",
+    title: "Ilia Goginashvili | Backend Developer",
     description:
-      "Backend engineer building production systems with Node.js, TypeScript, and clean architecture",
+      "Backend-focused Software Engineer Trainee building production systems with Node.js, TypeScript, and clean architecture",
     images: ["/og-image.png"],
     creator: "@ilia_dev", // Update with your Twitter handle if you have one
   },
@@ -104,7 +103,6 @@ export default function RootLayout({
           enableSystem
         >
           <CustomCursor />
-          <ConsoleEggs />
           {children}
         </ThemeProvider>
       </body>

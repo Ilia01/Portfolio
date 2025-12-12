@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface TypewriterTextProps {
   text: string;
@@ -20,6 +20,8 @@ export function TypewriterText({
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -31,29 +33,45 @@ export function TypewriterText({
   }, []);
 
   useEffect(() => {
+    // Cleanup function
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
     if (prefersReducedMotion) {
       setDisplayedText(text);
       return;
     }
 
-    const startTimeout = setTimeout(() => {
+    // Clear any existing timers
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+    timeoutRef.current = setTimeout(() => {
       setIsTyping(true);
       let i = 0;
 
-      const typeInterval = setInterval(() => {
+      intervalRef.current = setInterval(() => {
         if (i < text.length) {
           setDisplayedText(text.slice(0, i + 1));
           i++;
         } else {
-          clearInterval(typeInterval);
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
           setIsTyping(false);
         }
       }, speed);
-
-      return () => clearInterval(typeInterval);
     }, delay);
 
-    return () => clearTimeout(startTimeout);
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [text, speed, delay, prefersReducedMotion]);
 
   if (prefersReducedMotion) {

@@ -50,6 +50,43 @@ export function About() {
             </div>
           </motion.div>
 
+          {/* What I'm Looking For - prominent placement for recruiters */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="rounded-lg border border-green-500/20 bg-green-500/5 dark:bg-green-500/10 p-4 sm:p-6"
+          >
+            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500" />
+              What I&apos;m Looking For
+            </h3>
+            <div className="flex flex-wrap gap-2 mb-4">
+              <span className="px-3 py-1.5 text-sm font-medium text-green-700 dark:text-green-300 bg-green-500/10 dark:bg-green-500/20 rounded-full">
+                {profileData.lookingFor.role}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {profileData.lookingFor.focus.map((item) => (
+                <span
+                  key={item}
+                  className="px-2.5 py-1 text-xs text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-full"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+            <ul className="space-y-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+              {profileData.lookingFor.preferences.map((pref, index) => (
+                <li key={index} className="flex items-center gap-2">
+                  <span className="text-green-500">→</span>
+                  {pref}
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
           {/* Additional Info */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

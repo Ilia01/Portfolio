@@ -1,8 +1,8 @@
 export const profileData = {
   name: "Ilia Goginashvili",
-  tagline: "Software Engineer Trainee at Andersen, leading a Node.js team. Built Aegis2FA to learn auth the hard way.",
+  tagline: "Backend-focused Software Engineering Trainee with hands-on experience in TypeScript, Node.js, and secure API development.",
   role: "Software Engineer Trainee",
-  roleExtended: "Node.js Team Lead at Andersen · TypeScript · NestJS · Express",
+  roleExtended: "Node.js Team at Andersen · TypeScript · NestJS · Express",
   focus: "clean architecture, auth & security, PostgreSQL/Prisma, performance",
 
   contact: {
@@ -15,58 +15,58 @@ export const profileData = {
   experience: [
     {
       company: "Andersen",
-      role: "Software Engineer Trainee (Node.js Team Lead)",
+      role: "Software Engineer Trainee",
       period: "October 2025 - Present",
-      location: "T'bilisi, Georgia",
+      location: "Tbilisi, Georgia",
       highlights: [
-        "Leading Node.js development team, conducting code reviews and architecture decisions",
-        "Took on Tech Lead responsibilities including epic estimation",
-        "Managing team workflow",
-        "Implementing clean architecture patterns",
+        "Contributing to Node.js backend development with TypeScript and NestJS",
+        "Participating in code reviews and architectural discussions",
+        "Acting as interim technical point of contact, supporting estimations and team coordination",
+        "Applying clean architecture patterns and SOLID principles in production code",
       ],
-      technologies: ["Node.js", "TypeScript", "NestJS", "PostgreSQL", "Redis", "Team Leadership", "Code Reviews"],
+      technologies: ["Node.js", "TypeScript", "NestJS", "PostgreSQL", "Redis", "Code Reviews"],
     },
   ],
 
   about: {
-    intro: "Software Engineer Trainee at Andersen, leading a Node.js team. Handling code reviews, epic estimation, and architecture decisions.",
+    intro: "Backend-focused Software Engineering Trainee at Andersen with hands-on experience in TypeScript, Node.js, and secure API development.",
     focus: "clean architecture, auth & security, PostgreSQL/Prisma, performance",
     philosophy: [
       "Built Aegis2FA to understand authentication deeply, not to replace Auth0",
-      "Code reviews and team work over solo hero mode",
+      "Learning through code reviews and collaborative development",
       "Tests should catch bugs, docs should explain why",
     ],
-    tagline: "Backend systems. Team leadership. More leading, more code.",
+    tagline: "Backend systems. Clean architecture. Learning by building.",
   },
 
   skills: {
     languages: [
-      { name: "TypeScript", level: "expert" as const },
-      { name: "JavaScript", level: "expert" as const },
-      { name: "Python", level: "proficient" as const },
-      { name: "Rust", level: "familiar" as const },
+      { name: "TypeScript", level: "daily" as const, context: "Production backend systems" },
+      { name: "JavaScript", level: "daily" as const, context: "Node.js APIs" },
+      { name: "Python", level: "regular" as const, context: "Tooling & automation" },
+      { name: "Rust", level: "learning" as const, context: "Security projects" },
     ],
     backend: [
-      { name: "NestJS", level: "expert" as const },
-      { name: "Express", level: "expert" as const },
-      { name: "Fastify", level: "familiar" as const },
-      { name: "Django", level: "familiar" as const },
+      { name: "NestJS", level: "daily" as const, context: "Primary framework at work" },
+      { name: "Express", level: "daily" as const, context: "Personal projects" },
+      { name: "Fastify", level: "learning" as const },
+      { name: "Django", level: "learning" as const },
     ],
     data: [
-      { name: "PostgreSQL", level: "expert" as const },
-      { name: "Prisma", level: "expert" as const },
-      { name: "Redis", level: "proficient" as const },
-      { name: "MongoDB", level: "familiar" as const },
+      { name: "PostgreSQL", level: "daily" as const, context: "Production databases" },
+      { name: "Prisma", level: "daily" as const, context: "ORM of choice" },
+      { name: "Redis", level: "regular" as const, context: "Caching & sessions" },
+      { name: "MongoDB", level: "learning" as const },
     ],
     frontend: [
-      { name: "Next.js", level: "proficient" as const },
-      { name: "React", level: "proficient" as const },
-      { name: "Tailwind CSS", level: "proficient" as const },
+      { name: "Next.js", level: "regular" as const, context: "This portfolio" },
+      { name: "React", level: "regular" as const },
+      { name: "Tailwind CSS", level: "regular" as const },
     ],
     infrastructure: [
-      { name: "Docker", level: "proficient" as const },
-      { name: "GitHub Actions", level: "proficient" as const },
-      { name: "Nginx", level: "familiar" as const },
+      { name: "Docker", level: "regular" as const, context: "Local dev & CI" },
+      { name: "GitHub Actions", level: "regular" as const, context: "CI/CD pipelines" },
+      { name: "Nginx", level: "learning" as const },
     ],
     operations: [
       "REST API design",
@@ -77,18 +77,28 @@ export const profileData = {
     ],
   },
 
+  lookingFor: {
+    role: "Junior / Trainee Backend Engineer",
+    focus: ["Node.js", "TypeScript", "Backend systems", "Security-focused teams"],
+    preferences: [
+      "Open to mentorship and long-term growth",
+      "Remote-friendly or Tbilisi-based",
+      "Teams that value clean code and testing",
+    ],
+  },
+
   projects: [
     {
       id: "aegis2fa",
       title: "Aegis2FA",
       subtitle: "Two-Factor Authentication Service (Active Development)",
-      description: "Built a complete 2FA service to understand authentication patterns. TOTP, JWT refresh tokens, Argon2, and 80%+ test coverage.",
+      description: "Self-hosted 2FA service implementing TOTP-based authentication, JWT with refresh token rotation, and Argon2 password hashing to secure user authentication flows.",
       longDescription: "Learning project to understand authentication deeply. Features TOTP, SMS, and Email verification with comprehensive documentation and tests. Active development with regular updates.",
 
-      // Problem-Action-Result
-      problem: "Wanted to understand authentication beyond tutorials—how TOTP works, why Argon2 beats bcrypt, how JWT refresh token rotation prevents theft.",
-      action: "Built a complete 2FA service from scratch with multiple auth methods, proper security patterns, and 80%+ test coverage. Documented everything I learned.",
-      result: "Gained hands-on experience with authentication patterns. Now applying these lessons to production systems at Andersen.",
+      // Problem-Action-Result (concise for above-fold)
+      problem: "Wanted to understand auth beyond tutorials—TOTP, Argon2, JWT rotation.",
+      action: "Built complete 2FA service with multiple methods, 80%+ test coverage.",
+      result: "Now applying these patterns in production at Andersen.",
 
       // Impact Metrics
       impact: {
@@ -145,10 +155,10 @@ export const profileData = {
       description: "Static site generator for OpenAPI specs. Built it because I needed it, then used it to document my other projects.",
       longDescription: "Python tool that converts OpenAPI specifications into static HTML documentation. Built as a personal tool, then used for Aegis2FA and task-management-api docs.",
 
-      // Problem-Action-Result
-      problem: "Swagger UI feels outdated, and I wanted offline docs without paying for hosted services.",
-      action: "Built a Python static site generator using Jinja2 templates. Takes OpenAPI YAML files and generates searchable HTML with version management.",
-      result: "Created a tool I actually use. Documented Aegis2FA and task-management-api with it. No servers needed, works offline.",
+      // Problem-Action-Result (concise)
+      problem: "Wanted offline API docs without hosted services.",
+      action: "Built Python static site generator from OpenAPI YAML.",
+      result: "Using it to document my own projects. No servers needed.",
 
       // Impact Metrics
       impact: {
@@ -192,10 +202,10 @@ export const profileData = {
       description: "Node.js REST API demonstrating SOLID principles, design patterns, and JavaScript fundamentals.",
       longDescription: "Comprehensive Node.js/Express application built as a conceptual project for interview preparation, demonstrating clean code practices and fundamental concepts.",
 
-      // Problem-Action-Result
-      problem: "Need to demonstrate mastery of JavaScript fundamentals, SOLID principles, and design patterns for technical interviews.",
-      action: "Built a comprehensive REST API showcasing 15+ design patterns, clean architecture, and core JavaScript concepts with extensive documentation.",
-      result: "Created an interview-ready codebase that demonstrates production coding standards and architectural best practices.",
+      // Problem-Action-Result (concise)
+      problem: "Needed interview-ready code demonstrating JS fundamentals.",
+      action: "Built REST API with 15+ design patterns and SOLID principles.",
+      result: "Interview-ready codebase showing production standards.",
 
       // Impact Metrics
       impact: {
@@ -236,10 +246,10 @@ export const profileData = {
       description: "Artificial life simulation with evolving agents, real-time visualization, and production-like structure.",
       longDescription: "Systems design project featuring evolving agents with traits, mutation, and natural selection. Includes both CLI and web interfaces.",
 
-      // Problem-Action-Result
-      problem: "Complex systems simulation often lacks proper architecture and real-time visualization capabilities.",
-      action: "Built an artificial life engine with clean package structure, dual UI interfaces (CLI + Web), and extensible behavior system.",
-      result: "Created a production-ready simulation framework showcasing systems design, clean architecture, and data visualization.",
+      // Problem-Action-Result (concise)
+      problem: "Wanted to practice systems design with real-time visualization.",
+      action: "Built life simulation with clean architecture and dual UI.",
+      result: "Production-like Python project showcasing extensible design.",
 
       // Impact Metrics
       impact: {
@@ -281,10 +291,10 @@ export const profileData = {
       description: "Secure CLI password manager using Argon2 key derivation and AES-256-GCM encryption.",
       longDescription: "Command-line password manager implementing modern cryptography standards for secure password storage and retrieval.",
 
-      // Problem-Action-Result
-      problem: "Many password managers are GUI-only, lack modern crypto standards, or store master passwords insecurely.",
-      action: "Built a CLI password manager in Rust using Argon2 key derivation and AES-256-GCM encryption with zero-knowledge architecture.",
-      result: "Created a secure, memory-safe password manager that never stores the master password and leverages Rust's safety guarantees.",
+      // Problem-Action-Result (concise)
+      problem: "Wanted to learn Rust through a security-focused project.",
+      action: "Built CLI password manager with Argon2 and AES-256-GCM.",
+      result: "Learned Rust memory safety while implementing real crypto.",
 
       // Impact Metrics
       impact: {
