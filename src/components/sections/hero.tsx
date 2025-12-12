@@ -5,6 +5,17 @@ import { motion } from "framer-motion";
 import { Mail, FileText, Linkedin, Github } from "lucide-react";
 import { profileData } from "@/lib/data";
 import { ContactPanel } from "@/components/contact-panel";
+import { ScrambleText } from "@/components/scramble-text";
+import { TypewriterText } from "@/components/typewriter-text";
+import { FloatingHexagons } from "@/components/floating-hexagons";
+
+const ROLE_PHRASES = [
+  "Backend Developer",
+  "Security Enthusiast",
+  "Node.js Engineer",
+  "API Designer",
+  "Auth Specialist",
+];
 
 export function Hero() {
   const [contactPanelOpen, setContactPanelOpen] = useState(false);
@@ -16,8 +27,12 @@ export function Hero() {
         className="min-h-[100dvh] flex flex-col items-center justify-center px-4 pt-28 pb-20 sm:pt-32 sm:pb-24 relative overflow-hidden"
       >
         {/* Background - Light and Dark modes */}
-        <div className="absolute inset-0 bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-900 dark:via-zinc-950 dark:to-black -z-10" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-green-500/5 dark:from-green-900/10 via-transparent to-transparent -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-900 dark:via-zinc-950 dark:to-black -z-10 transition-all duration-300" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-green-500/5 dark:from-green-900/10 via-transparent to-transparent -z-10 transition-all duration-300" />
+
+        {/* Floating hexagons */}
+        <FloatingHexagons />
+
 
         {/* Subtle grid pattern */}
         <div
@@ -44,24 +59,35 @@ export function Hero() {
             </span>
           </motion.div>
 
-          {/* Name with gradient */}
+          {/* Name with typewriter effect */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-4xl sm:text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-500 dark:from-white dark:via-zinc-200 dark:to-zinc-400 bg-clip-text text-transparent relative z-10 pb-1"
           >
-            {profileData.name}
+            <TypewriterText
+              text={profileData.name}
+              speed={100}
+              delay={500}
+              showCursor={true}
+            />
           </motion.h1>
 
-          {/* Role */}
+          {/* Role with scramble effect */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg sm:text-xl md:text-2xl text-zinc-700 dark:text-zinc-300 font-medium mb-4 sm:mb-6"
           >
-            Backend Developer (Trainee) at Andersen
+            <ScrambleText
+              phrases={ROLE_PHRASES}
+              className="text-green-600 dark:text-green-400"
+              scrambleSpeed={40}
+              pauseDuration={3000}
+            />
+            {" "}at Andersen
           </motion.p>
 
           {/* Tagline */}

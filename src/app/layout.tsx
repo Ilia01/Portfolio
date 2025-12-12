@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ConsoleEggs } from "@/components/console-eggs";
 import { StructuredData } from "@/components/structured-data";
+import { CustomCursor } from "@/components/custom-cursor";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -101,8 +102,8 @@ export default function RootLayout({
           attribute="class"
           defaultTheme="dark"
           enableSystem
-          disableTransitionOnChange
         >
+          <CustomCursor />
           <ConsoleEggs />
           {children}
         </ThemeProvider>
