@@ -5,7 +5,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 export function CustomCursor() {
   const [isHovering, setIsHovering] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [shouldRender, setShouldRender] = useState(false);
+  const [shouldRender, setShouldRender] = useState(true); // Default to true for desktop
 
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
@@ -20,18 +20,14 @@ export function CustomCursor() {
   }, []);
 
   useEffect(() => {
-    // Better device detection: check for hover capability AND fine pointer
-    const hasHover = window.matchMedia("(hover: hover)").matches;
-    const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
+    // Simple detection: disable only for touch devices or reduced motion
+    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Only show cursor on devices with hover + fine pointer + no reduced motion
-    if (!hasHover || !hasFinePointer || prefersReducedMotion) {
+    if (isTouchDevice || prefersReducedMotion) {
       setShouldRender(false);
       return;
     }
-
-    setShouldRender(true);
 
     const handleMouseMove = (e: MouseEvent) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
