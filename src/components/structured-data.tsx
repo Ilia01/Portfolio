@@ -8,16 +8,11 @@ export function StructuredData() {
     "@context": "https://schema.org",
     "@type": "Person",
     name: "Ilia Goginashvili",
-    jobTitle: "Software Engineer Team Lead",
+    jobTitle: "Backend Developer",
     description:
       "Backend developer specializing in Node.js, TypeScript, and clean architecture",
-    url: "https://ilia-goginashvili.dev", // Update with your actual domain
+    url: "https://ilia-goginashvili.dev",
     image: "https://ilia-goginashvili.dev/og-image.png",
-    worksFor: {
-      "@type": "Organization",
-      name: "Andersen",
-      url: "https://andersenlab.com",
-    },
     knowsAbout: [
       "Node.js",
       "TypeScript",

@@ -1,8 +1,8 @@
 export const profileData = {
   name: "Ilia Goginashvili",
-  tagline: "Backend-focused Software Engineering Trainee with hands-on experience in TypeScript, Node.js, and secure API development.",
-  role: "Software Engineer Trainee",
-  roleExtended: "Node.js Team at Andersen · TypeScript · NestJS · Express",
+  tagline: "Backend-focused Software Engineer specializing in TypeScript, Node.js, and secure API development.",
+  role: "Backend Developer",
+  roleExtended: "TypeScript · Node.js · NestJS · PostgreSQL · Clean Architecture",
   focus: "clean architecture, auth & security, PostgreSQL/Prisma, performance",
 
   contact: {
@@ -16,24 +16,24 @@ export const profileData = {
     {
       company: "Andersen",
       role: "Software Engineer Trainee",
-      period: "October 2025 - Present",
+      period: "October 2025 - December 2025",
       location: "Tbilisi, Georgia",
       highlights: [
-        "Contributing to Node.js backend development with TypeScript and NestJS",
-        "Participating in code reviews and architectural discussions",
-        "Acting as interim technical point of contact, supporting estimations and team coordination",
-        "Applying clean architecture patterns and SOLID principles in production code",
+        "Worked on a Node.js backend with TypeScript and NestJS in a team simulation environment",
+        "Took on coordination responsibilities after the team lead's departure — handled code reviews, task distribution, and sprint presentations",
+        "Helped onboard two new team members and walked them through the codebase and workflows",
+        "Gained hands-on experience making architectural decisions independently under limited guidance",
       ],
-      technologies: ["Node.js", "TypeScript", "NestJS", "PostgreSQL", "Redis", "Code Reviews"],
+      technologies: ["Node.js", "TypeScript", "NestJS", "PostgreSQL", "Redis"],
     },
   ],
 
   about: {
-    intro: "Backend-focused Software Engineering Trainee at Andersen with hands-on experience in TypeScript, Node.js, and secure API development.",
+    intro: "Backend-focused Software Engineer with hands-on experience in TypeScript, Node.js, and secure API development.",
     focus: "clean architecture, auth & security, PostgreSQL/Prisma, performance",
     philosophy: [
       "Built Aegis2FA to understand authentication deeply, not to replace Auth0",
-      "Learning through code reviews and collaborative development",
+      "Learning through building, breaking, and reviewing code",
       "Tests should catch bugs, docs should explain why",
     ],
     tagline: "Backend systems. Clean architecture. Learning by building.",
@@ -47,13 +47,13 @@ export const profileData = {
       { name: "Rust", level: "learning" as const, context: "Security projects" },
     ],
     backend: [
-      { name: "NestJS", level: "daily" as const, context: "Primary framework at work" },
+      { name: "NestJS", level: "daily" as const, context: "Primary backend framework" },
       { name: "Express", level: "daily" as const, context: "Personal projects" },
       { name: "Fastify", level: "learning" as const },
       { name: "Django", level: "learning" as const },
     ],
     data: [
-      { name: "PostgreSQL", level: "daily" as const, context: "Production databases" },
+      { name: "PostgreSQL", level: "daily" as const, context: "Primary database" },
       { name: "Prisma", level: "daily" as const, context: "ORM of choice" },
       { name: "Redis", level: "regular" as const, context: "Caching & sessions" },
       { name: "MongoDB", level: "learning" as const },
@@ -78,7 +78,7 @@ export const profileData = {
   },
 
   lookingFor: {
-    role: "Junior / Trainee Backend Engineer",
+    role: "Junior Backend Engineer",
     focus: ["Node.js", "TypeScript", "Backend systems", "Security-focused teams"],
     preferences: [
       "Open to mentorship and long-term growth",
@@ -98,7 +98,7 @@ export const profileData = {
       // Problem-Action-Result (concise for above-fold)
       problem: "Wanted to understand auth beyond tutorials—TOTP, Argon2, JWT rotation.",
       action: "Built complete 2FA service with multiple methods, 80%+ test coverage.",
-      result: "Now applying these patterns in production at Andersen.",
+      result: "Deep understanding of auth patterns I can apply in any production codebase.",
 
       // Impact Metrics
       impact: {
@@ -133,7 +133,7 @@ export const profileData = {
       ],
       highlights: [
         "Technical deep-dive into authentication patterns",
-        "Applying these patterns in production work now",
+        "Auth patterns applicable to any production backend",
         "Test suite catches edge cases (80%+ coverage)",
         "Documentation-first approach",
       ],

@@ -21,10 +21,10 @@ export const metadata: Metadata = {
     template: "%s | Ilia Goginashvili",
   },
   description:
-    "Backend-focused Software Engineer Trainee with hands-on experience in TypeScript, Node.js, and secure API development. Building production systems with clean architecture at Andersen. Open to opportunities.",
+    "Backend-focused Software Engineer with hands-on experience in TypeScript, Node.js, and secure API development. Clean architecture, authentication systems, and API design. Open to opportunities.",
   keywords: [
     "Backend Developer",
-    "Software Engineer Trainee",
+    "Software Engineer",
     "TypeScript",
     "NestJS Developer",
     "Express.js",
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     url: "https://ilia-goginashvili.dev", // Update with your actual domain
     title: "Ilia Goginashvili | Backend Developer",
     description:
-      "Backend-focused Software Engineer Trainee building secure APIs and production systems with Node.js, TypeScript, and clean architecture at Andersen.",
+      "Backend-focused Software Engineer building secure APIs with Node.js, TypeScript, and clean architecture. Open to opportunities.",
     siteName: "Ilia Goginashvili Portfolio",
     images: [
       {
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Ilia Goginashvili | Backend Developer",
     description:
-      "Backend-focused Software Engineer Trainee building production systems with Node.js, TypeScript, and clean architecture",
+      "Backend-focused Software Engineer building backend systems with Node.js, TypeScript, and clean architecture",
     images: ["/og-image.png"],
     creator: "@ilia_dev", // Update with your Twitter handle if you have one
   },

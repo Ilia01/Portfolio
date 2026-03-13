@@ -87,7 +87,7 @@ export function Hero() {
               scrambleSpeed={40}
               pauseDuration={3000}
             />
-            {" "}at Andersen
+            {" "}in Tbilisi
           </motion.p>
 
           {/* Tagline */}

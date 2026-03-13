@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ilia Goginashvili - Resume</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: #1a1a1a;
+      background: #fff;
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 40px 52px;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header { margin-bottom: 24px; }
+
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .header .subtitle {
+      font-size: 13.5px;
+      color: #444;
+      margin-bottom: 8px;
+    }
+
+    .contact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 18px;
+      font-size: 12px;
+      color: #555;
+    }
+
+    .contact a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    .contact a:hover { text-decoration: underline; }
+
+    /* Sections */
+    section { margin-bottom: 20px; }
+
+    section h2 {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #888;
+      padding-bottom: 6px;
+      border-bottom: 1.5px solid #e5e5e5;
+      margin-bottom: 12px;
+    }
+
+    /* Skills */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 4px 14px;
+    }
+
+    .skills-grid dt {
+      font-weight: 600;
+      font-size: 12px;
+      color: #333;
+    }
+
+    .skills-grid dd {
+      font-size: 12.5px;
+      color: #444;
+    }
+
+    /* Project */
+    .project { margin-bottom: 14px; }
+
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1px;
+    }
+
+    .project-title {
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    .project-link {
+      font-size: 11px;
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    .project-tech {
+      font-size: 11.5px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    /* Experience */
+    .job { margin-bottom: 14px; }
+
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1px;
+    }
+
+    .job-title {
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    .job-period {
+      font-size: 12px;
+      color: #666;
+      white-space: nowrap;
+    }
+
+    .job-company {
+      font-size: 12.5px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    /* Lists */
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    ul li {
+      position: relative;
+      padding-left: 12px;
+      margin-bottom: 2px;
+      color: #333;
+      font-size: 12.5px;
+    }
+
+    ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 7px;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: #999;
+    }
+
+    /* Education & Additional */
+    .edu-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .edu-title { font-weight: 600; font-size: 13px; }
+
+    .edu-period {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .edu-school {
+      font-size: 12.5px;
+      color: #555;
+    }
+
+    .additional {
+      font-size: 12px;
+      color: #555;
+      line-height: 1.7;
+    }
+
+    .additional strong { color: #333; }
+
+    /* Print */
+    @media print {
+      body { padding: 28px 36px; }
+      .contact a { color: #1a1a1a; }
+      section h2 { color: #666; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Ilia Goginashvili</h1>
+    <div class="subtitle">Backend Engineer &mdash; Node.js, TypeScript, PostgreSQL</div>
+    <div class="contact">
+      <span>Tbilisi, Georgia</span>
+      <a href="mailto:iliagoginashvili16@gmail.com">iliagoginashvili16@gmail.com</a>
+      <a href="https://linkedin.com/in/ilia-goginashvili-066689305">LinkedIn</a>
+      <a href="https://github.com/Ilia01">GitHub</a>
+      <a href="https://www.iliagoginashvili.com">iliagoginashvili.com</a>
+    </div>
+  </div>
+
+  <section>
+    <h2>Skills</h2>
+    <dl class="skills-grid">
+      <dt>Languages</dt>
+      <dd>TypeScript, JavaScript, Python, Rust</dd>
+      <dt>Backend</dt>
+      <dd>Node.js, NestJS, Express, Fastify</dd>
+      <dt>Databases</dt>
+      <dd>PostgreSQL, Prisma ORM, Redis, MongoDB</dd>
+      <dt>Frontend</dt>
+      <dd>React, Next.js, Tailwind CSS</dd>
+      <dt>Infrastructure</dt>
+      <dd>Docker, GitHub Actions, Nginx, CI/CD</dd>
+      <dt>Security</dt>
+      <dd>JWT, TOTP/2FA, Argon2, AES-256-GCM, RBAC</dd>
+      <dt>Practices</dt>
+      <dd>Clean Architecture, SOLID, REST APIs, OpenAPI, testing</dd>
+    </dl>
+  </section>
+
+  <section>
+    <h2>Projects</h2>
+
+    <div class="project">
+      <div class="project-header">
+        <span class="project-title">Aegis2FA</span>
+        <a class="project-link" href="https://github.com/Ilia01/Aegis2FA">github.com/Ilia01/Aegis2FA</a>
+      </div>
+      <div class="project-tech">Node.js, Express, TypeScript, PostgreSQL, Redis, Prisma, Docker, GitHub Actions</div>
+      <ul>
+        <li>Self-hosted 2FA service — TOTP authentication, JWT with refresh token rotation, Argon2 password hashing</li>
+        <li>Role-based access control, rate limiting, CSRF protection</li>
+        <li>80%+ test coverage across unit, integration, and E2E tests</li>
+        <li>Full documentation site with MkDocs, OpenAPI spec</li>
+      </ul>
+    </div>
+
+    <div class="project">
+      <div class="project-header">
+        <span class="project-title">ApiFlow</span>
+        <a class="project-link" href="https://github.com/Ilia01/apiflow">github.com/Ilia01/apiflow</a>
+      </div>
+      <div class="project-tech">Python, Jinja2, OpenAPI 3.0</div>
+      <ul>
+        <li>Static site generator — converts OpenAPI YAML into searchable HTML documentation</li>
+        <li>Customizable themes, versioning, changelogs, offline-first</li>
+        <li>Used to document Aegis2FA and Task Management API</li>
+      </ul>
+    </div>
+
+    <div class="project">
+      <div class="project-header">
+        <span class="project-title">DevFlow</span>
+        <a class="project-link" href="https://github.com/Ilia01/devflow">github.com/Ilia01/devflow</a>
+      </div>
+      <div class="project-tech">Rust</div>
+      <ul>
+        <li>CLI tool automating Jira/Git workflows — one command from ticket to branch to PR</li>
+      </ul>
+    </div>
+
+    <div class="project">
+      <div class="project-header">
+        <span class="project-title">Password Manager</span>
+        <a class="project-link" href="https://github.com/Ilia01/Password-Manager">github.com/Ilia01/Password-Manager</a>
+      </div>
+      <div class="project-tech">Rust, Argon2, AES-256-GCM</div>
+      <ul>
+        <li>CLI password manager — Argon2 key derivation, AES-256-GCM encryption, zero-knowledge architecture</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Experience</h2>
+    <div class="job">
+      <div class="job-header">
+        <span class="job-title">Software Engineer Trainee</span>
+        <span class="job-period">Oct - Dec 2025</span>
+      </div>
+      <div class="job-company">Andersen &middot; Tbilisi, Georgia</div>
+      <ul>
+        <li>Node.js backend development with TypeScript and NestJS in a team simulation environment</li>
+        <li>Took on coordination after the team lead's departure — code reviews, task distribution, sprint presentations</li>
+        <li>Onboarded two new team members, walked them through codebase and workflows</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Education</h2>
+    <div class="edu-line">
+      <span class="edu-title">Bachelor's Degree</span>
+      <span class="edu-period">Expected 2027</span>
+    </div>
+    <div class="edu-school">BTU &middot; Tbilisi, Georgia</div>
+  </section>
+
+  <section>
+    <h2>Additional</h2>
+    <div class="additional">
+      <strong>Languages:</strong> English (Proficient), Georgian (Native)<br>
+      <strong>Writing:</strong> Technical blog — auth patterns, JWT, backend security<br>
+      <strong>Open to:</strong> Remote or Tbilisi-based &middot; Junior Backend / Full-stack roles
+    </div>
+  </section>
+
+</body>
+</html>
