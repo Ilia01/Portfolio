@@ -14,10 +14,9 @@ export function Experience() {
           transition={{ duration: 0.5 }}
           className="mb-16"
         >
-          <h2 className="font-serif text-3xl sm:text-4xl text-cream mb-3">
+          <h2 className="font-serif text-3xl sm:text-4xl text-cream">
             Experience
           </h2>
-          <div className="w-10 h-px bg-amber/50" />
         </motion.div>
 
         <div>
@@ -58,7 +57,6 @@ export function Experience() {
               </div>
             </motion.div>
           ))}
-          <div className="border-t border-rule" />
         </div>
       </div>
     </section>

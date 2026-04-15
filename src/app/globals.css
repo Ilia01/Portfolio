@@ -46,6 +46,12 @@
     color: #fff;
   }
 
+  a,
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+
   /* Focus-visible: amber ring so keyboard users can navigate clearly */
   *:focus-visible {
     outline: 2px solid var(--color-amber);

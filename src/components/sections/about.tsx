@@ -14,10 +14,9 @@ export function About() {
           transition={{ duration: 0.5 }}
           className="mb-12"
         >
-          <h2 className="font-serif text-3xl sm:text-4xl text-cream mb-3">
+          <h2 className="font-serif text-3xl sm:text-4xl text-cream">
             About
           </h2>
-          <div className="w-10 h-px bg-amber/50" />
         </motion.div>
 
         <div className="grid md:grid-cols-[3fr_2fr] gap-16">

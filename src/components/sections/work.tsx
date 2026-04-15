@@ -15,13 +15,9 @@ export function Work() {
           transition={{ duration: 0.5 }}
           className="mb-16"
         >
-          <h2 className="font-serif text-3xl sm:text-4xl text-cream mb-3">
+          <h2 className="font-serif text-3xl sm:text-4xl text-cream">
             Work
           </h2>
-          <div className="w-10 h-px bg-amber/50 mb-4" />
-          <p className="text-stone text-sm">
-            Shipped tools with docs, tests, CI, and release workflows.
-          </p>
         </motion.div>
 
         <div>
@@ -92,26 +88,7 @@ export function Work() {
               </div>
             </motion.article>
           ))}
-          <div className="border-t border-rule" />
         </div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-10 text-center"
-        >
-          <a
-            href={profileData.contact.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 font-mono text-sm text-stone hover:text-amber transition-colors duration-200"
-          >
-            More on GitHub
-            <ArrowUpRight className="w-3.5 h-3.5" />
-          </a>
-        </motion.div>
       </div>
     </section>
   );

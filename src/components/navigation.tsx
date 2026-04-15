@@ -5,13 +5,49 @@ import { motion } from "framer-motion";
 
 export function Navigation() {
   const [scrolled, setScrolled] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const pauseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ticking = useRef(false);
 
   useEffect(() => {
     const handleScroll = () => {
       if (!ticking.current) {
         requestAnimationFrame(() => {
-          setScrolled(window.scrollY > 50);
+          const currentY = window.scrollY;
+          const isScrollingDown = currentY > lastScrollY.current;
+          const pastThreshold = currentY > 100;
+
+          setScrolled(currentY > 50);
+
+          if (!pastThreshold) {
+            // Always show nav near the top
+            setVisible(true);
+          } else if (isScrollingDown) {
+            // Scrolling down: hide
+            setVisible(false);
+
+            // Clear any existing pause timer
+            if (pauseTimer.current) {
+              clearTimeout(pauseTimer.current);
+              pauseTimer.current = null;
+            }
+          } else {
+            // Scrolling up: show immediately
+            setVisible(true);
+          }
+
+          // Set a pause timer — if user stops scrolling for 1s while hidden, show nav
+          if (pauseTimer.current) {
+            clearTimeout(pauseTimer.current);
+          }
+          if (pastThreshold && isScrollingDown) {
+            pauseTimer.current = setTimeout(() => {
+              setVisible(true);
+            }, 1000);
+          }
+
+          lastScrollY.current = currentY;
           ticking.current = false;
         });
         ticking.current = true;
@@ -19,7 +55,10 @@ export function Navigation() {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (pauseTimer.current) clearTimeout(pauseTimer.current);
+    };
   }, []);
 
   const scrollToSection = (id: string) => {
@@ -38,9 +77,9 @@ export function Navigation() {
   return (
     <motion.nav
       initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      animate={{ y: visible ? 0 : -100 }}
+      transition={{ duration: 0.35, ease: "easeInOut" }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
         scrolled
           ? "bg-ink/90 backdrop-blur-lg border-b border-rule/60"
           : "bg-transparent"
