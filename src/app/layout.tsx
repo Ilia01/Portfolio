@@ -44,33 +44,24 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Ilia Goginashvili", url: "https://github.com/Ilia01" }],
   creator: "Ilia Goginashvili",
-  metadataBase: new URL("https://ilia-goginashvili.dev"),
+  metadataBase: new URL("https://iliagoginashvili.com"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://ilia-goginashvili.dev",
+    url: "https://iliagoginashvili.com",
     title: "Ilia Goginashvili | Backend Engineer",
     description:
       "Backend engineer based in Tbilisi, Georgia. Building systems and open-source tools with TypeScript, Node.js, and PostgreSQL.",
     siteName: "Ilia Goginashvili",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Ilia Goginashvili - Backend Engineer",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Ilia Goginashvili | Backend Engineer",
     description:
       "Backend engineer building systems and open-source tools with TypeScript and Node.js.",
-    images: ["/og-image.png"],
   },
   robots: {
     index: true,
