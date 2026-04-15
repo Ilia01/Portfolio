@@ -1,75 +1,76 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Instrument_Serif, Figtree, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
 import { StructuredData } from "@/components/structured-data";
-import { CustomCursor } from "@/components/custom-cursor";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
   subsets: ["latin"],
+  weight: "400",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const figtree = Figtree({
+  variable: "--font-figtree",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "Ilia Goginashvili | Backend Developer",
+    default: "Ilia Goginashvili | Backend Engineer",
     template: "%s | Ilia Goginashvili",
   },
   description:
-    "Backend-focused Software Engineer with hands-on experience in TypeScript, Node.js, and secure API development. Clean architecture, authentication systems, and API design. Open to opportunities.",
+    "Backend engineer based in Tbilisi, Georgia. Building systems and open-source tools with TypeScript, Node.js, and PostgreSQL.",
   keywords: [
-    "Backend Developer",
+    "Backend Engineer",
     "Software Engineer",
     "TypeScript",
-    "NestJS Developer",
-    "Express.js",
+    "Node.js",
+    "NestJS",
     "PostgreSQL",
-    "Prisma ORM",
-    "Authentication Expert",
-    "Clean Architecture",
-    "Software Engineer",
-    "Backend Consultant",
-    "API Development",
-    "Microservices",
-    "Tbilisi Georgia Developer",
+    "Open Source",
+    "CLI Tools",
+    "Tbilisi",
+    "Georgia",
   ],
   authors: [{ name: "Ilia Goginashvili", url: "https://github.com/Ilia01" }],
   creator: "Ilia Goginashvili",
-  publisher: "Ilia Goginashvili",
-  metadataBase: new URL("https://ilia-goginashvili.dev"), // Update with your actual domain
+  metadataBase: new URL("https://ilia-goginashvili.dev"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://ilia-goginashvili.dev", // Update with your actual domain
-    title: "Ilia Goginashvili | Backend Developer",
+    url: "https://ilia-goginashvili.dev",
+    title: "Ilia Goginashvili | Backend Engineer",
     description:
-      "Backend-focused Software Engineer building secure APIs with Node.js, TypeScript, and clean architecture. Open to opportunities.",
-    siteName: "Ilia Goginashvili Portfolio",
+      "Backend engineer based in Tbilisi, Georgia. Building systems and open-source tools with TypeScript, Node.js, and PostgreSQL.",
+    siteName: "Ilia Goginashvili",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Ilia Goginashvili - Backend Developer",
-        type: "image/png",
+        alt: "Ilia Goginashvili - Backend Engineer",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ilia Goginashvili | Backend Developer",
+    title: "Ilia Goginashvili | Backend Engineer",
     description:
-      "Backend-focused Software Engineer building backend systems with Node.js, TypeScript, and clean architecture",
+      "Backend engineer building systems and open-source tools with TypeScript and Node.js.",
     images: ["/og-image.png"],
-    creator: "@ilia_dev", // Update with your Twitter handle if you have one
   },
   robots: {
     index: true,
@@ -90,21 +91,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <head>
         <StructuredData />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${instrumentSerif.variable} ${figtree.variable} ${ibmPlexMono.variable}`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-        >
-          <CustomCursor />
-          {children}
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   );

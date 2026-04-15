@@ -1,39 +1,19 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-instrument-serif);
+  --font-sans: var(--font-figtree);
+  --font-mono: var(--font-ibm-plex-mono);
 
-  --animate-gradient: gradient 15s ease infinite;
-
-  /* Dark mode configuration */
-  --color-scheme: light dark;
-}
-
-/* Configure dark mode variant for class-based switching */
-@variant dark (.dark &);
-
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-@keyframes blink {
-  0%, 50% {
-    opacity: 1;
-  }
-  51%, 100% {
-    opacity: 0;
-  }
+  --color-ink: #0e0d0b;
+  --color-paper: #161412;
+  --color-raised: #1e1b18;
+  --color-rule: #2c2825;
+  --color-cream: #ede9e2;
+  --color-stone: #a39d95;
+  --color-ash: #7a746d;
+  --color-amber: #d4a054;
+  --color-amber-light: #e0b470;
 }
 
 @layer base {
@@ -41,10 +21,52 @@
     @apply scroll-smooth;
   }
 
-  /* Custom scrollbar */
+  body {
+    @apply bg-ink text-cream font-sans antialiased;
+  }
+
+  /* Grain: tactile texture, subconsciously reads as "crafted" */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  ::selection {
+    background-color: rgba(212, 160, 84, 0.3);
+    color: #fff;
+  }
+
+  ::-moz-selection {
+    background-color: rgba(212, 160, 84, 0.3);
+    color: #fff;
+  }
+
+  /* Focus-visible: amber ring so keyboard users can navigate clearly */
+  *:focus-visible {
+    outline: 2px solid var(--color-amber);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
   }
 
   ::-webkit-scrollbar-track {
@@ -52,72 +74,16 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgb(161, 161, 170); /* zinc-400 */
-    border-radius: 4px;
+    background: var(--color-rule);
+    border-radius: 3px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgb(113, 113, 122); /* zinc-500 */
+    background: var(--color-ash);
   }
 
-  .dark ::-webkit-scrollbar-thumb {
-    background: rgb(63, 63, 70); /* zinc-700 */
-  }
-
-  .dark ::-webkit-scrollbar-thumb:hover {
-    background: rgb(82, 82, 91); /* zinc-600 */
-  }
-
-  /* Firefox scrollbar - apply only to scrollable containers */
   html {
     scrollbar-width: thin;
-    scrollbar-color: rgb(161, 161, 170) transparent;
-  }
-
-  .dark html {
-    scrollbar-color: rgb(63, 63, 70) transparent;
-  }
-
-  body {
-    @apply bg-white dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50;
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-
-  /* Hide default cursor on devices with hover AND fine pointer (desktop mice) */
-  @media (hover: hover) and (pointer: fine) {
-    * {
-      cursor: none !important;
-    }
-  }
-
-  /* Custom selection color - green accent with contrasting text */
-  ::selection {
-    background-color: rgb(34, 197, 94);
-    color: rgb(0, 0, 0);
-  }
-
-  ::-moz-selection {
-    background-color: rgb(34, 197, 94);
-    color: rgb(0, 0, 0);
-  }
-
-  /* Fix rehype-pretty-code nested code element background */
-  pre > code {
-    background: transparent !important;
-    padding: 0 !important;
-    border: none !important;
-  }
-
-  /* Ensure code blocks have consistent styling */
-  pre [data-line] {
-    padding-left: 0;
-    padding-right: 1rem;
-  }
-}
-
-@layer utilities {
-  .animate-gradient {
-    background-size: 200% 200%;
-    animation: gradient 15s ease infinite;
+    scrollbar-color: var(--color-rule) transparent;
   }
 }

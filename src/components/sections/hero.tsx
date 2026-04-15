@@ -1,171 +1,100 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, FileText, Linkedin, Github } from "lucide-react";
 import { profileData } from "@/lib/data";
-import { ContactPanel } from "@/components/contact-panel";
-import { ScrambleText } from "@/components/scramble-text";
-import { TypewriterText } from "@/components/typewriter-text";
-import { FloatingHexagons } from "@/components/floating-hexagons";
-
-const ROLE_PHRASES = [
-  "Backend Developer",
-  "Security Enthusiast",
-  "Node.js Engineer",
-  "API Designer",
-  "Auth Specialist",
-];
 
 export function Hero() {
-  const [contactPanelOpen, setContactPanelOpen] = useState(false);
-
   return (
-    <>
-      <section
-        id="hero"
-        className="min-h-[100dvh] flex flex-col items-center justify-center px-4 pt-28 pb-20 sm:pt-32 sm:pb-24 relative overflow-hidden"
+    <section
+      id="hero"
+      className="min-h-[100dvh] flex flex-col items-center justify-center px-6 relative overflow-hidden"
+    >
+      {/* Layered warm glow: creates depth and draws the eye inward */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_40%,_rgba(212,160,84,0.07)_0%,_transparent_70%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,_rgba(30,27,24,0.8)_0%,_transparent_50%)] pointer-events-none" />
+
+      <div className="max-w-3xl mx-auto w-full text-center relative z-10">
+        {/* Role + location: establishes context immediately */}
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="font-mono text-xs sm:text-sm text-ash tracking-[0.2em] uppercase mb-8"
+        >
+          {profileData.role}
+          <span className="inline-block mx-3 text-rule">&#8212;</span>
+          {profileData.location}
+        </motion.p>
+
+        {/* Name: the centerpiece. Serif at large scale signals authority */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+          className="font-serif text-5xl sm:text-7xl md:text-8xl text-cream mb-8 leading-[1.05] tracking-tight"
+        >
+          {profileData.name}
+        </motion.h1>
+
+        {/* Tagline: clear, readable, not trying too hard */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.25, ease: "easeOut" }}
+          className="text-lg sm:text-xl text-stone max-w-lg mx-auto mb-12 leading-relaxed"
+        >
+          I build backend systems and ship open-source tools
+          <br className="hidden sm:block" />
+          with TypeScript and Node.js.
+        </motion.p>
+
+        {/* Links: subtle but accessible. Amber on the email to guide action */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.4, ease: "easeOut" }}
+          className="flex items-center justify-center gap-6 sm:gap-8 font-mono text-sm"
+        >
+          <a
+            href={profileData.contact.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-stone hover:text-cream transition-colors duration-200"
+          >
+            GitHub
+          </a>
+          <span className="w-1 h-1 rounded-full bg-rule" />
+          <a
+            href={profileData.contact.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-stone hover:text-cream transition-colors duration-200"
+          >
+            LinkedIn
+          </a>
+          <span className="w-1 h-1 rounded-full bg-rule" />
+          <a
+            href={`mailto:${profileData.contact.email}`}
+            className="text-amber hover:text-amber-light transition-colors duration-200"
+          >
+            Email
+          </a>
+        </motion.div>
+      </div>
+
+      {/* Scroll indicator: gentle pulse, not distracting */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 1.2 }}
+        className="absolute bottom-12 left-1/2 -translate-x-1/2"
       >
-        {/* Background - Light and Dark modes */}
-        <div className="absolute inset-0 bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-900 dark:via-zinc-950 dark:to-black -z-10 transition-all duration-300" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-green-500/5 dark:from-green-900/10 via-transparent to-transparent -z-10 transition-all duration-300" />
-
-        {/* Floating hexagons */}
-        <FloatingHexagons />
-
-
-        {/* Subtle grid pattern */}
-        <div
-          className="absolute inset-0 -z-10 opacity-[0.03] dark:opacity-[0.02]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
+        <motion.div
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+          className="w-px h-10 bg-gradient-to-b from-transparent via-amber/20 to-transparent"
         />
-
-        <div className="max-w-4xl mx-auto w-full text-center my-auto relative z-10">
-          {/* Availability + Location */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-6 sm:mb-8 flex flex-wrap justify-center items-center gap-2 sm:gap-3"
-          >
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-sm font-medium">
-              <span className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400" />
-              Open to opportunities
-            </span>
-            <span className="text-zinc-500 dark:text-zinc-500 text-sm">
-              Tbilisi, Georgia · Open to Remote
-            </span>
-          </motion.div>
-
-          {/* Name with typewriter effect */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-500 dark:from-white dark:via-zinc-200 dark:to-zinc-400 bg-clip-text text-transparent relative z-10 pb-1"
-          >
-            <TypewriterText
-              text={profileData.name}
-              speed={100}
-              delay={500}
-              showCursor={true}
-            />
-          </motion.h1>
-
-          {/* Role with scramble effect */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg sm:text-xl md:text-2xl text-zinc-700 dark:text-zinc-300 font-medium mb-4 sm:mb-6"
-          >
-            <ScrambleText
-              phrases={ROLE_PHRASES}
-              className="text-green-600 dark:text-green-400"
-              scrambleSpeed={40}
-              pauseDuration={3000}
-            />
-            {" "}in Tbilisi
-          </motion.p>
-
-          {/* Tagline */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed"
-          >
-            Finishing my degree while gaining hands-on experience in a Node.js team.
-            Building auth systems and security-focused APIs to understand the fundamentals deeply.
-          </motion.p>
-
-          {/* CTA Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex flex-wrap justify-center gap-2 sm:gap-3"
-          >
-            <button
-              onClick={() => setContactPanelOpen(true)}
-              className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg transition-all flex items-center gap-2 shadow-lg shadow-green-500/20"
-            >
-              <Mail className="w-4 h-4" />
-              Contact Me
-            </button>
-
-            <a
-              href="/resume-ilia-goginashvili.pdf"
-              download="Ilia_Goginashvili_Resume.pdf"
-              className="px-6 py-3 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white font-medium rounded-lg transition-all flex items-center gap-2 border border-zinc-200 dark:border-zinc-700"
-            >
-              <FileText className="w-4 h-4" />
-              Resume
-            </a>
-
-            <a
-              href={profileData.contact.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-3 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white font-medium rounded-lg transition-all flex items-center gap-2 border border-zinc-200 dark:border-zinc-700"
-              aria-label="LinkedIn"
-            >
-              <Linkedin className="w-4 h-4" />
-            </a>
-
-            <a
-              href={profileData.contact.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-3 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white font-medium rounded-lg transition-all flex items-center gap-2 border border-zinc-200 dark:border-zinc-700"
-              aria-label="GitHub"
-            >
-              <Github className="w-4 h-4" />
-            </a>
-          </motion.div>
-
-          {/* Tech stack hint */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="mt-8 sm:mt-12 hidden sm:flex flex-wrap justify-center gap-2 sm:gap-3"
-          >
-            {["TypeScript", "Node.js", "NestJS", "PostgreSQL", "Redis"].map((tech) => (
-              <span
-                key={tech}
-                className="px-3 py-1 text-xs text-zinc-600 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-900 rounded-full border border-zinc-200 dark:border-zinc-800"
-              >
-                {tech}
-              </span>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      <ContactPanel isOpen={contactPanelOpen} onClose={() => setContactPanelOpen(false)} />
-    </>
+      </motion.div>
+    </section>
   );
 }

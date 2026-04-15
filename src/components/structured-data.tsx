@@ -1,50 +1,45 @@
-/**
- * Structured Data (JSON-LD) for SEO
- * Provides machine-readable information about the person and website
- */
-
 export function StructuredData() {
   const personSchema = {
     "@context": "https://schema.org",
     "@type": "Person",
     name: "Ilia Goginashvili",
-    jobTitle: "Backend Developer",
+    jobTitle: "Backend Engineer",
     description:
-      "Backend developer specializing in Node.js, TypeScript, and clean architecture",
+      "Backend engineer building systems and open-source tools with TypeScript and Node.js",
     url: "https://ilia-goginashvili.dev",
     image: "https://ilia-goginashvili.dev/og-image.png",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Tbilisi",
+      addressCountry: "GE",
+    },
     knowsAbout: [
-      "Node.js",
       "TypeScript",
-      "JavaScript",
-      "Python",
+      "Node.js",
       "NestJS",
-      "Express.js",
+      "Express",
       "PostgreSQL",
-      "Prisma ORM",
-      "RESTful APIs",
-      "Authentication Systems",
-      "Clean Architecture",
-      "Microservices",
       "Docker",
-      "Git",
+      "GitHub Actions",
+      "Redis",
+      "Prisma",
+      "REST APIs",
+      "CLI Tools",
+      "Open Source",
     ],
     sameAs: [
       "https://github.com/Ilia01",
-      "https://linkedin.com/in/ilia-goginashvili", // Update with your LinkedIn
+      "https://www.linkedin.com/in/ilia-goginashvili-066689305",
     ],
-    alumniOf: {
-      "@type": "EducationalOrganization",
-      name: "Business and Technology University", // Update if different
-    },
   };
 
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Ilia Goginashvili Portfolio",
+    name: "Ilia Goginashvili",
     url: "https://ilia-goginashvili.dev",
-    description: "Portfolio and blog of Ilia Goginashvili, Backend Developer",
+    description:
+      "Portfolio of Ilia Goginashvili, backend engineer based in Tbilisi, Georgia",
     author: {
       "@type": "Person",
       name: "Ilia Goginashvili",
