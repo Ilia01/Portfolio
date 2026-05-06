@@ -2,6 +2,7 @@
 
 import { Navigation } from "@/components/navigation";
 import { SideRails } from "@/components/side-rails";
+import { SectionDivider } from "@/components/section-divider";
 import { Hero } from "@/components/sections/hero";
 import { Experience } from "@/components/sections/experience";
 import { Work } from "@/components/sections/work";
@@ -15,9 +16,13 @@ export default function Home() {
       <SideRails />
       <main>
         <Hero />
-        <Work />
-        <Experience />
+        <SectionDivider />
         <About />
+        <SectionDivider />
+        <Work />
+        <SectionDivider />
+        <Experience />
+        <SectionDivider />
         <Contact />
       </main>
     </div>

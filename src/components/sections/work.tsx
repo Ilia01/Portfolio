@@ -3,22 +3,21 @@
 import { motion } from "framer-motion";
 import { profileData } from "@/lib/data";
 import { ArrowUpRight } from "lucide-react";
+import { SectionHeader } from "@/components/section-header";
 
 export function Work() {
   return (
-    <section id="work" className="py-24 sm:py-32 px-6">
+    <section
+      id="work"
+      className="py-24 sm:py-32 px-6 scroll-mt-20"
+    >
       <div className="max-w-5xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-16"
-        >
-          <h2 className="font-serif text-3xl sm:text-4xl text-cream">
-            Work
-          </h2>
-        </motion.div>
+        <SectionHeader
+          index="02"
+          kicker="Work"
+          title="Selected work."
+          compact
+        />
 
         <div>
           {profileData.projects.map((project, index) => (

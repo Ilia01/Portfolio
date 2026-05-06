@@ -2,7 +2,13 @@ export const profileData = {
   name: "Ilia Goginashvili",
   role: "Backend Engineer",
   location: "Tbilisi, Georgia",
-  availability: "Open to remote work",
+  availability: {
+    status: "available",
+    label: "Available for full-time & freelance",
+  },
+  currently: "Building HookLens, a CLI for debugging webhook signatures.",
+  resumeUrl: "/resume-ilia-goginashvili.pdf",
+  heroStack: ["TypeScript", "Node.js", "NestJS", "PostgreSQL", "Docker"],
 
   contact: {
     email: "iliagoginashvili16@gmail.com",
@@ -11,9 +17,7 @@ export const profileData = {
   },
 
   about: [
-    "I'm a backend-focused engineer working mostly with TypeScript and Node.js. I like building things that are useful, shipping them, and iterating based on what actually breaks.",
-    "Outside of client and team work, I build open-source tools and publish them. Not as side projects that sit in a repo, but as real packages with docs, CI, tests, and release workflows. The kind of thing where someone can npm install it and it works.",
-    "I care about clean architecture, good tests, and clear documentation. I'd rather ship something solid and small than something big and fragile.",
+    "I'm a backend dev based in Tbilisi. I work mostly in TypeScript and Node, with NestJS and Postgres on the production side. I finished a trainee role at Andersen at the end of 2025 and I've been splitting time between freelance projects and open-source CLIs since. The day-to-day stack you see below is what I reach for first.",
   ],
 
   experience: [
@@ -72,3 +76,15 @@ export const profileData = {
 
 export type ProfileData = typeof profileData;
 export type Project = (typeof profileData.projects)[number];
+
+export const SECTIONS = [
+  { id: "about", label: "About", index: "01" },
+  { id: "work", label: "Work", index: "02" },
+  { id: "experience", label: "Experience", index: "03" },
+  { id: "contact", label: "Contact", index: "04" },
+] as const;
+
+export const TRACKED_SECTION_IDS = [
+  "hero",
+  ...SECTIONS.map((s) => s.id),
+] as const;

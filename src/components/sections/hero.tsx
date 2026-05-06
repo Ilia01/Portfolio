@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { profileData } from "@/lib/data";
+import { ArrowUpRight } from "lucide-react";
 
 export function Hero() {
   return (
@@ -9,24 +10,25 @@ export function Hero() {
       id="hero"
       className="min-h-[100dvh] flex flex-col items-center justify-center px-6 relative overflow-hidden"
     >
-      {/* Layered warm glow: creates depth and draws the eye inward */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_40%,_rgba(212,160,84,0.07)_0%,_transparent_70%)] pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,_rgba(30,27,24,0.8)_0%,_transparent_50%)] pointer-events-none" />
 
       <div className="max-w-3xl mx-auto w-full text-center relative z-10">
-        {/* Role + location: establishes context immediately */}
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          className="font-mono text-xs sm:text-sm text-ash tracking-[0.2em] uppercase mb-8"
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="inline-flex items-center gap-2.5 px-3.5 py-1.5 mb-12 border border-amber/25 rounded-full bg-amber/5 backdrop-blur-sm"
         >
-          {profileData.role}
-          <span className="inline-block mx-3 text-rule">&#8212;</span>
-          {profileData.location}
-        </motion.p>
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-amber/60 animate-ping" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-amber" />
+          </span>
+          <span className="font-mono text-[11px] sm:text-xs text-amber/90 tracking-[0.15em] uppercase">
+            {profileData.availability.label}
+          </span>
+        </motion.div>
 
-        {/* Name: the centerpiece. Serif at large scale signals authority */}
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -36,24 +38,37 @@ export function Hero() {
           {profileData.name}
         </motion.h1>
 
-        {/* Tagline: clear, readable, not trying too hard */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.25, ease: "easeOut" }}
-          className="text-lg sm:text-xl text-stone max-w-lg mx-auto mb-12 leading-relaxed"
+          transition={{ duration: 0.7, delay: 0.22, ease: "easeOut" }}
+          className="text-lg sm:text-xl text-stone max-w-xl mx-auto mb-14 leading-relaxed"
         >
-          I build backend systems and ship open-source tools
-          <br className="hidden sm:block" />
-          with TypeScript and Node.js.
+          Backend engineer in {profileData.location.split(",")[0]}, building
+          systems and shipping open-source tools with TypeScript and Node.js.
         </motion.p>
 
-        {/* Links: subtle but accessible. Amber on the email to guide action */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.34, ease: "easeOut" }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-12 max-w-xl mx-auto"
+        >
+          <span className="inline-flex items-center gap-3 font-mono text-[10px] text-amber/60 tracking-[0.25em] uppercase shrink-0">
+            Now
+            <span className="w-8 h-px bg-rule sm:hidden" />
+          </span>
+          <span className="hidden sm:block w-8 h-px bg-rule shrink-0" />
+          <span className="text-sm text-ash leading-relaxed text-center sm:text-left">
+            {profileData.currently}
+          </span>
+        </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4, ease: "easeOut" }}
-          className="flex items-center justify-center gap-6 sm:gap-8 font-mono text-sm"
+          transition={{ duration: 0.7, delay: 0.46, ease: "easeOut" }}
+          className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 sm:gap-x-7 font-mono text-sm"
         >
           <a
             href={profileData.contact.github}
@@ -79,10 +94,18 @@ export function Hero() {
           >
             Email
           </a>
+          <span className="w-1 h-1 rounded-full bg-rule" />
+          <a
+            href={profileData.resumeUrl}
+            download
+            className="inline-flex items-center gap-1 text-stone hover:text-amber transition-colors duration-200"
+          >
+            Résumé
+            <ArrowUpRight className="w-3 h-3" />
+          </a>
         </motion.div>
       </div>
 
-      {/* Scroll indicator: gentle pulse, not distracting */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { profileData, SECTIONS, TRACKED_SECTION_IDS } from "@/lib/data";
+import { useActiveSection } from "@/hooks/use-active-section";
 
 export function Navigation() {
   const [scrolled, setScrolled] = useState(false);
@@ -9,6 +11,8 @@ export function Navigation() {
   const lastScrollY = useRef(0);
   const pauseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ticking = useRef(false);
+
+  const active = useActiveSection(TRACKED_SECTION_IDS);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,30 +25,20 @@ export function Navigation() {
           setScrolled(currentY > 50);
 
           if (!pastThreshold) {
-            // Always show nav near the top
             setVisible(true);
           } else if (isScrollingDown) {
-            // Scrolling down: hide
             setVisible(false);
-
-            // Clear any existing pause timer
             if (pauseTimer.current) {
               clearTimeout(pauseTimer.current);
               pauseTimer.current = null;
             }
           } else {
-            // Scrolling up: show immediately
             setVisible(true);
           }
 
-          // Set a pause timer — if user stops scrolling for 1s while hidden, show nav
-          if (pauseTimer.current) {
-            clearTimeout(pauseTimer.current);
-          }
+          if (pauseTimer.current) clearTimeout(pauseTimer.current);
           if (pastThreshold && isScrollingDown) {
-            pauseTimer.current = setTimeout(() => {
-              setVisible(true);
-            }, 1000);
+            pauseTimer.current = setTimeout(() => setVisible(true), 1000);
           }
 
           lastScrollY.current = currentY;
@@ -63,16 +57,8 @@ export function Navigation() {
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+    if (element) element.scrollIntoView({ behavior: "smooth" });
   };
-
-  const links = [
-    { id: "work", label: "Work" },
-    { id: "experience", label: "Experience" },
-    { id: "about", label: "About" },
-  ];
 
   return (
     <motion.nav
@@ -85,7 +71,7 @@ export function Navigation() {
           : "bg-transparent"
       }`}
     >
-      <div className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
+      <div className="px-6 sm:px-10 py-5 flex items-center justify-between">
         <button
           onClick={() => scrollToSection("hero")}
           className="font-serif text-xl text-amber hover:text-amber-light transition-colors"
@@ -94,27 +80,62 @@ export function Navigation() {
           IG
         </button>
 
-        <div className="flex items-center gap-6 sm:gap-8 font-mono text-sm tracking-wide">
-          {links.map((link) => (
-            <button
-              key={link.id}
-              onClick={() => scrollToSection(link.id)}
-              className="text-stone hover:text-cream transition-colors hidden sm:block"
-            >
-              {link.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-5 sm:gap-7 font-mono text-sm tracking-wide">
+          {SECTIONS.filter((s) => s.id !== "contact").map((link) => {
+            const isActive = active === link.id;
+            return (
+              <button
+                key={link.id}
+                onClick={() => scrollToSection(link.id)}
+                className={`relative hidden sm:inline-flex items-center pl-3.5 transition-colors ${
+                  isActive ? "text-cream" : "text-stone hover:text-cream"
+                }`}
+              >
+                {isActive && (
+                  <motion.span
+                    layoutId="nav-active-dot"
+                    transition={{
+                      type: "spring",
+                      stiffness: 380,
+                      damping: 30,
+                    }}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-amber"
+                  />
+                )}
+                {link.label}
+              </button>
+            );
+          })}
+
+          {/* Mobile: just Work, no active state shown */}
           <button
             onClick={() => scrollToSection("work")}
             className="text-stone hover:text-cream transition-colors sm:hidden"
           >
             Work
           </button>
+
+          <a
+            href={profileData.resumeUrl}
+            download
+            className="text-stone hover:text-cream transition-colors hidden md:block"
+          >
+            Résumé
+          </a>
+
           <button
             onClick={() => scrollToSection("contact")}
-            className="text-amber hover:text-amber-light transition-colors border border-amber/30 px-3 py-1.5 rounded hover:border-amber/50"
+            className={`relative inline-flex items-center gap-2 transition-all border px-3.5 py-1.5 rounded ${
+              active === "contact"
+                ? "text-amber-light border-amber/70 bg-amber/10"
+                : "text-amber border-amber/40 hover:border-amber/70 hover:bg-amber/5"
+            }`}
           >
-            Contact
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-amber/60 animate-ping" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber" />
+            </span>
+            Hire me
           </button>
         </div>
       </div>
