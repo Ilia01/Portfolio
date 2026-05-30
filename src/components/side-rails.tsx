@@ -44,65 +44,48 @@ export function SideRails() {
       return r.top - ulRect.top + r.height / 2;
     });
 
+    const sectionCenters: (number | null)[] = SECTIONS.map((s) => {
+      const el = document.getElementById(s.id);
+      if (!el) return null;
+      const rect = el.getBoundingClientRect();
+      return rect.top + rect.height / 2;
+    });
+
     const viewportCenter = window.innerHeight / 2;
     let targetCenter: number | null = null;
     let opacity = 0;
 
-    for (let i = 0; i < SECTIONS.length; i++) {
-      const el = document.getElementById(SECTIONS[i].id);
-      if (!el) continue;
-      const rect = el.getBoundingClientRect();
+    const firstCenter = sectionCenters[0];
+    const lastIdx = SECTIONS.length - 1;
+    const lastCenter = sectionCenters[lastIdx];
 
-      const sectionTop = rect.top;
-      const sectionBottom = rect.bottom;
-
-      if (sectionTop <= viewportCenter && sectionBottom >= viewportCenter) {
-        const progress = Math.min(
-          1,
-          Math.max(0, (viewportCenter - sectionTop) / Math.max(1, rect.height)),
-        );
-        const current = liCenters[i];
-        const next = liCenters[i + 1] ?? current;
-        if (current != null && next != null) {
-          targetCenter = current + (next - current) * progress;
-          opacity = 1;
-        }
-        break;
-      }
-
-      if (sectionTop > viewportCenter) {
-        if (i === 0) {
-          targetCenter = liCenters[0];
-          opacity = 0;
-        } else {
-          const prevEl = document.getElementById(SECTIONS[i - 1].id);
-          const prevRect = prevEl?.getBoundingClientRect();
-          if (prevRect) {
-            const gap = sectionTop - prevRect.bottom;
-            const into =
-              gap > 0
-                ? Math.min(
-                    1,
-                    Math.max(0, (viewportCenter - prevRect.bottom) / gap),
-                  )
-                : 1;
-            const prevLi = liCenters[i - 1];
-            const currLi = liCenters[i];
-            if (prevLi != null && currLi != null) {
-              targetCenter = prevLi + (currLi - prevLi) * into;
-              opacity = 1;
-            }
-          }
-        }
-        break;
-      }
+    if (firstCenter == null) {
+      markerOpacity.set(0);
+      return;
     }
 
-    if (targetCenter == null) {
-      const last = liCenters[liCenters.length - 1];
-      if (last != null) {
-        targetCenter = last;
-        opacity = 1;
+    if (viewportCenter <= firstCenter) {
+      targetCenter = liCenters[0];
+      opacity = 1;
+    } else if (lastCenter != null && viewportCenter >= lastCenter) {
+      targetCenter = liCenters[lastIdx];
+      opacity = 1;
+    } else {
+      for (let i = 0; i < lastIdx; i++) {
+        const a = sectionCenters[i];
+        const b = sectionCenters[i + 1];
+        if (a == null || b == null) continue;
+        if (viewportCenter >= a && viewportCenter < b) {
+          const span = Math.max(1, b - a);
+          const t = Math.min(1, Math.max(0, (viewportCenter - a) / span));
+          const liA = liCenters[i];
+          const liB = liCenters[i + 1];
+          if (liA != null && liB != null) {
+            targetCenter = liA + (liB - liA) * t;
+            opacity = 1;
+          }
+          break;
+        }
       }
     }
 
