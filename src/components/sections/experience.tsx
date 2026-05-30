@@ -1,62 +1,98 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { profileData } from "@/lib/data";
-import { SectionHeader } from "@/components/section-header";
 
 export function Experience() {
+  const reduce = useReducedMotion();
+  const ease = [0.16, 1, 0.3, 1] as const;
+
   return (
     <section
       id="experience"
-      className="py-24 sm:py-32 px-6 scroll-mt-20"
+      className="relative w-full px-6 sm:px-10 py-24 sm:py-32"
     >
-      <div className="max-w-5xl mx-auto">
-        <SectionHeader
-          index="03"
-          kicker="Experience"
-          title="Where I've worked."
-          compact
-        />
+      <div className="mx-auto w-full max-w-[1400px]">
+        <motion.h2
+          initial={reduce ? false : { opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.6, ease }}
+          className="mb-16 text-balance text-3xl sm:text-4xl font-medium tracking-[-0.02em] text-cream"
+        >
+          Experience.
+        </motion.h2>
 
-        <div>
-          {profileData.experience.map((exp, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
+        <ol className="relative space-y-12 border-l border-rule/60 pl-6 sm:pl-10">
+          {profileData.experience.map((role, i) => (
+            <motion.li
+              key={`${role.company}-${i}`}
+              initial={reduce ? false : { opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="border-t border-rule pt-10 pb-10"
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, delay: i * 0.05, ease }}
+              className="relative"
             >
-              <div className="grid sm:grid-cols-[1fr_auto] gap-4 sm:gap-12 mb-5">
-                <div>
-                  <h3 className="font-serif text-2xl text-cream">{exp.role}</h3>
-                  <p className="text-amber text-sm mt-1.5 font-medium">
-                    {exp.company}
-                  </p>
-                </div>
-                <p className="font-mono text-xs text-ash tracking-wide self-start pt-2">
-                  {exp.period} / {exp.location}
+              <span className="absolute -left-[33px] sm:-left-[45px] top-2 h-2 w-2 rounded-full bg-amber" />
+
+              <div className="flex flex-wrap items-baseline justify-between gap-3">
+                <h3 className="text-xl sm:text-2xl font-medium tracking-[-0.02em] text-cream">
+                  {role.role}
+                  <span className="ml-3 text-stone">at {role.company}</span>
+                </h3>
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ash">
+                  {role.period}
                 </p>
               </div>
 
-              <p className="text-cream/80 leading-relaxed max-w-2xl mb-6">
-                {exp.description}
+              <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-ash">
+                {role.location}
               </p>
 
-              <div className="flex flex-wrap gap-2">
-                {exp.technologies.map((tech) => (
+              <p className="mt-5 max-w-[65ch] text-pretty text-base leading-relaxed text-stone">
+                {role.description}
+              </p>
+
+              <div className="mt-5 flex flex-wrap gap-1.5">
+                {role.technologies.map((t) => (
                   <span
-                    key={tech}
-                    className="font-mono text-xs text-stone px-2.5 py-1 border border-rule rounded bg-raised/50"
+                    key={t}
+                    className="rounded-full border border-rule px-2.5 py-1 font-mono text-[10.5px] text-stone"
                   >
-                    {tech}
+                    {t}
                   </span>
                 ))}
               </div>
-            </motion.div>
+            </motion.li>
           ))}
-        </div>
+
+          <motion.li
+            initial={reduce ? false : { opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, ease }}
+            className="relative"
+          >
+            <span className="absolute -left-[33px] sm:-left-[45px] top-2 flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-amber/60 animate-ping" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-amber" />
+            </span>
+            <div className="flex flex-wrap items-baseline justify-between gap-3">
+              <h3 className="text-xl sm:text-2xl font-medium tracking-[-0.02em] text-cream">
+                Freelance and open source
+                <span className="ml-3 text-stone">independent</span>
+              </h3>
+              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ash">
+                Jan 2026 to present
+              </p>
+            </div>
+            <p className="mt-5 max-w-[65ch] text-pretty text-base leading-relaxed text-stone">
+              Building client work, shipping CLIs to npm, and rebuilding
+              mprmahjong.com end-to-end. Available for new full-time and
+              freelance opportunities.
+            </p>
+          </motion.li>
+        </ol>
       </div>
     </section>
   );

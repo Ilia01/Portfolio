@@ -1,123 +1,111 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { profileData } from "@/lib/data";
+import { MprmahjongPreview } from "@/components/mprmahjong-preview";
 import { ArrowUpRight } from "lucide-react";
 
 export function Hero() {
+  const reduce = useReducedMotion();
+  const ease = [0.16, 1, 0.3, 1] as const;
+
   return (
     <section
       id="hero"
-      className="min-h-[100dvh] flex flex-col items-center justify-center px-6 relative overflow-hidden"
+      className="relative min-h-[100dvh] w-full overflow-hidden px-6 sm:px-10 pt-28 pb-16 lg:pt-24 lg:pb-20"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_40%,_rgba(212,160,84,0.07)_0%,_transparent_70%)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,_rgba(30,27,24,0.8)_0%,_transparent_50%)] pointer-events-none" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_30%_25%,_rgba(212,160,84,0.06)_0%,_transparent_65%)]" />
 
-      <div className="max-w-3xl mx-auto w-full text-center relative z-10">
+      <div className="relative mx-auto grid h-full w-full max-w-[1400px] grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-16">
+        <div className="lg:col-span-7 xl:col-span-7">
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease }}
+            className="inline-flex items-center gap-2.5 rounded-full border border-amber/25 bg-amber/[0.04] px-3.5 py-1.5"
+          >
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-amber/60 animate-ping" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber" />
+            </span>
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-amber/90">
+              {profileData.availability.label}
+            </span>
+          </motion.div>
+
+          <motion.h1
+            initial={reduce ? false : { opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.08, ease }}
+            className="mt-8 text-balance font-sans text-[clamp(2.5rem,6vw,5rem)] font-medium leading-[1.02] tracking-[-0.03em] text-cream"
+          >
+            Full-stack developer.
+            <br />
+            <span className="text-stone">Shipping product end-to-end.</span>
+          </motion.h1>
+
+          <motion.p
+            initial={reduce ? false : { opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.18, ease }}
+            className="mt-7 max-w-[58ch] text-pretty text-base sm:text-lg leading-relaxed text-stone"
+          >
+            {profileData.intro}
+          </motion.p>
+
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.3, ease }}
+            className="mt-10 flex flex-wrap items-center gap-3"
+          >
+            <a
+              href={`mailto:${profileData.contact.email}`}
+              className="group inline-flex items-center gap-2 rounded-full bg-amber px-5 py-2.5 font-mono text-sm font-medium text-ink transition-all hover:bg-amber-light active:scale-[0.98]"
+            >
+              Start a conversation
+              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </a>
+            <a
+              href={profileData.contact.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-rule px-5 py-2.5 font-mono text-sm text-cream transition-all hover:border-stone hover:bg-paper/60 active:scale-[0.98]"
+            >
+              GitHub
+            </a>
+            <a
+              href={profileData.resumeUrl}
+              download
+              className="inline-flex items-center gap-1.5 px-2 py-2.5 font-mono text-sm text-ash transition-colors hover:text-cream"
+            >
+              Résumé
+              <ArrowUpRight className="h-3 w-3" />
+            </a>
+          </motion.div>
+
+        </div>
+
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="inline-flex items-center gap-2.5 px-3.5 py-1.5 mb-12 border border-amber/25 rounded-full bg-amber/5 backdrop-blur-sm"
+          initial={reduce ? false : { opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.9, delay: 0.25, ease }}
+          className="lg:col-span-5 xl:col-span-5"
         >
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full rounded-full bg-amber/60 animate-ping" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-amber" />
-          </span>
-          <span className="font-mono text-[11px] sm:text-xs text-amber/90 tracking-[0.15em] uppercase">
-            {profileData.availability.label}
-          </span>
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
-          className="font-serif text-5xl sm:text-7xl md:text-8xl text-cream mb-8 leading-[1.05] tracking-tight"
-        >
-          {profileData.name}
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.22, ease: "easeOut" }}
-          className="text-lg sm:text-xl text-stone max-w-xl mx-auto mb-14 leading-relaxed"
-        >
-          Backend engineer in {profileData.location.split(",")[0]}, building
-          systems and shipping open-source tools with TypeScript and Node.js.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.34, ease: "easeOut" }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-12 max-w-xl mx-auto"
-        >
-          <span className="inline-flex items-center gap-3 font-mono text-[10px] text-amber/60 tracking-[0.25em] uppercase shrink-0">
-            Now
-            <span className="w-8 h-px bg-rule sm:hidden" />
-          </span>
-          <span className="hidden sm:block w-8 h-px bg-rule shrink-0" />
-          <span className="text-sm text-ash leading-relaxed text-center sm:text-left">
-            {profileData.currently}
-          </span>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.46, ease: "easeOut" }}
-          className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 sm:gap-x-7 font-mono text-sm"
-        >
-          <a
-            href={profileData.contact.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-stone hover:text-cream transition-colors duration-200"
-          >
-            GitHub
-          </a>
-          <span className="w-1 h-1 rounded-full bg-rule" />
-          <a
-            href={profileData.contact.linkedin}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-stone hover:text-cream transition-colors duration-200"
-          >
-            LinkedIn
-          </a>
-          <span className="w-1 h-1 rounded-full bg-rule" />
-          <a
-            href={`mailto:${profileData.contact.email}`}
-            className="text-amber hover:text-amber-light transition-colors duration-200"
-          >
-            Email
-          </a>
-          <span className="w-1 h-1 rounded-full bg-rule" />
-          <a
-            href={profileData.resumeUrl}
-            download
-            className="inline-flex items-center gap-1 text-stone hover:text-amber transition-colors duration-200"
-          >
-            Résumé
-            <ArrowUpRight className="w-3 h-3" />
-          </a>
+          <div className="mx-auto w-full max-w-md lg:max-w-none">
+            <MprmahjongPreview compact />
+            <div className="mt-4 flex items-baseline justify-between font-mono text-[11px] uppercase tracking-[0.18em] text-ash">
+              <span>Currently building</span>
+              <a
+                href="#building"
+                className="text-stone transition-colors hover:text-cream"
+              >
+                Read more
+              </a>
+            </div>
+          </div>
         </motion.div>
       </div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 1.2 }}
-        className="absolute bottom-12 left-1/2 -translate-x-1/2"
-      >
-        <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-          className="w-px h-10 bg-gradient-to-b from-transparent via-amber/20 to-transparent"
-        />
-      </motion.div>
     </section>
   );
 }

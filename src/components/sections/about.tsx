@@ -1,104 +1,143 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { profileData } from "@/lib/data";
-import { SectionHeader } from "@/components/section-header";
 
 export function About() {
-  const dailyStack = [
-    "TypeScript",
-    "Node",
-    "NestJS",
-    "PostgreSQL",
-    "Docker",
-    "Redis",
-    "GitHub Actions",
-    "Prisma",
-  ];
+  const reduce = useReducedMotion();
+  const ease = [0.16, 1, 0.3, 1] as const;
+  const { primary, tools, also } = profileData.stack;
 
   return (
     <section
       id="about"
-      className="py-28 sm:py-36 px-6 relative scroll-mt-20"
+      className="relative w-full px-6 sm:px-10 py-24 sm:py-32"
     >
-      <div className="max-w-3xl mx-auto">
-        <SectionHeader
-          index="01"
-          kicker="About"
-          title="Briefly."
-          lede="A short note on what I do, what I'm chasing, and where to find me."
-        />
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-cream/85 leading-[1.85] text-base sm:text-lg max-w-xl mx-auto text-center mb-14"
-        >
-          {profileData.about[0]}
-        </motion.p>
-
+      <div className="mx-auto w-full max-w-[1400px]">
         <motion.div
-          initial={{ opacity: 0, scaleX: 0.4 }}
-          whileInView={{ opacity: 1, scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="h-px bg-rule mx-auto mb-12 max-w-[280px]"
-          aria-hidden
-        />
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={reduce ? false : { opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-6 sm:gap-10 items-center mb-14"
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.6, ease }}
+          className="mb-14 flex items-start gap-5"
         >
-          <Callout label="Open for" alignment="right">
-            Full-time roles and freelance work.
-          </Callout>
-          <span className="hidden sm:block w-px h-12 bg-rule" aria-hidden />
-          <Callout label="Learning" alignment="left">
-            Rust and low-level programming.
-          </Callout>
+          <span
+            aria-hidden
+            className="mt-2 block h-12 w-px bg-amber"
+          />
+          <div>
+            <h2 className="text-balance text-3xl sm:text-4xl font-medium tracking-[-0.02em] text-cream">
+              About
+            </h2>
+            <p className="mt-2 text-sm text-stone">How I work and where I fit in.</p>
+          </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="text-center"
-        >
-          <p className="font-serif italic text-amber/70 text-sm mb-3">
-            Daily stack
-          </p>
-          <p className="font-mono text-xs sm:text-sm text-stone leading-relaxed max-w-xl mx-auto">
-            {dailyStack.join("  ·  ")}
-          </p>
-        </motion.div>
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7, ease }}
+            className="lg:col-span-7"
+          >
+            <div className="space-y-6 text-pretty text-base sm:text-lg leading-relaxed text-stone">
+              {profileData.about.map((p, i) => (
+                <p key={i} className="max-w-[62ch]">
+                  {p}
+                </p>
+              ))}
+            </div>
+          </motion.div>
+
+          <motion.aside
+            initial={reduce ? false : { opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7, delay: 0.1, ease }}
+            className="lg:col-span-5"
+          >
+            <div className="space-y-8 rounded-2xl border border-rule/70 bg-paper/40 p-7 sm:p-9">
+              <AvailabilityBlock />
+              <div className="h-px w-full bg-rule/60" />
+              <StackBlock label="Reach for first" items={primary} accent />
+              <StackBlock label="Tools" items={tools} />
+              <StackBlock label="Also comfortable in" items={also} />
+            </div>
+          </motion.aside>
+        </div>
       </div>
     </section>
   );
 }
 
-function Callout({
-  label,
-  children,
-  alignment,
-}: Readonly<{
-  label: string;
-  children: React.ReactNode;
-  alignment: "left" | "right";
-}>) {
-  const alignClass = alignment === "right" ? "sm:text-right" : "sm:text-left";
+function AvailabilityBlock() {
   return (
-    <div className={`text-center ${alignClass}`}>
-      <p className="font-mono text-[10px] text-amber/70 uppercase tracking-[0.25em] mb-2">
+    <div>
+      <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-ash">
+        Availability
+      </p>
+      <dl className="mt-4 space-y-3 text-sm">
+        <Row label="Based in" value="Tbilisi, GMT+4" />
+        <Row label="Reply within" value="A day on weekdays" />
+        <Row label="Engagements" value="3 to 12 weeks, scoped" />
+        <Row label="Status" value="Open to full-time and freelance" accent />
+      </dl>
+    </div>
+  );
+}
+
+function Row({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="flex items-baseline justify-between gap-4">
+      <dt className="shrink-0 font-mono text-[11px] text-ash">{label}</dt>
+      <dd
+        className={`text-right text-sm ${
+          accent ? "text-amber" : "text-cream"
+        }`}
+      >
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+function StackBlock({
+  label,
+  items,
+  accent,
+}: {
+  label: string;
+  items: readonly string[];
+  accent?: boolean;
+}) {
+  return (
+    <div>
+      <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-ash">
         {label}
       </p>
-      <p className="text-cream/90 leading-relaxed">{children}</p>
+      <ul className="mt-3 flex flex-wrap gap-1.5">
+        {items.map((item) => (
+          <li
+            key={item}
+            className={`rounded-full border px-2.5 py-1 font-mono text-[11px] ${
+              accent
+                ? "border-amber/30 bg-amber/[0.05] text-amber/90"
+                : "border-rule text-stone"
+            }`}
+          >
+            {item}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
