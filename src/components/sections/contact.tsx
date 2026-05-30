@@ -124,7 +124,7 @@ export function Contact() {
           className="mb-14 max-w-3xl"
         >
           <h2 className="text-balance text-4xl sm:text-5xl font-medium tracking-[-0.025em] text-cream">
-            Tell me what you're building.
+            Tell me what you&apos;re building.
           </h2>
           <p className="mt-5 max-w-[58ch] text-pretty text-base sm:text-lg leading-relaxed text-stone">
             One message, one reply within a day. I read everything that comes
